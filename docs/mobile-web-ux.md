@@ -11,7 +11,7 @@ by the viewport policy. Focus uses preventScroll when opening the menu.
 
 The policy is loaded from the first webapp entry and bundled CSS. It does not
 depend on reverse-proxy HTML substitution or injected external stylesheets.
-The `sakura-mobile-ux` HTML meta tag identifies this build as `11.7.14-mobile.3`.
+The `sakura-mobile-ux` HTML meta tag identifies this build as `11.7.14-mobile.3.1`.
 
 Build with the Node/npm versions in webapp/package.json and the committed
 lockfile. A lockfile-only repair aligns Rollup with the override already in
@@ -66,3 +66,12 @@ Focused composer, navigation, routing, keyboard-viewport, Home Screen entry and
 previous tooltip tests accompany this patch. Public browser acceptance covers
 single-touch send, DM/unread navigation, settings, draft preservation and layout.
 A simulated standalone flag or reduced viewport is not physical iPhone evidence.
+
+
+Mobile.3.1 fixes login return to the companion plugin's server-rendered setup
+and opaque-job open pages. The existing authentication flow completes first;
+only exact, same-origin paths under the configured site basename use a full
+page navigation. Other destinations keep the original SPA behavior. Reject
+external origins, query/fragment additions, encoded or normalized path tricks,
+and invalid job identifiers. The server still verifies the current session,
+active user and channel permission before opening a notification's target.

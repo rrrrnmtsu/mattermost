@@ -50,8 +50,10 @@ import DesktopApp from 'utils/desktop_api';
 import {isEmbedded} from 'utils/embed';
 import {DesktopNotificationSounds} from 'utils/notification_sounds';
 import {showNotification} from 'utils/notifications';
+import {getSiteURL} from 'utils/url';
 import {isDesktopApp} from 'utils/user_agent';
 import {setCSRFFromCookie} from 'utils/utils';
+import {navigateToWebPushDocument} from 'utils/webpush_login_redirect';
 
 import type {GlobalState} from 'types/store';
 
@@ -114,6 +116,14 @@ const Login = ({onCustomizeHeader}: LoginProps) => {
     const loginIdInput = useRef<HTMLInputElement>(null);
     const passwordInput = useRef<HTMLInputElement>(null);
     const closeSessionExpiredNotification = useRef<() => void>();
+    const documentRedirectStarted = useRef(false);
+    const navigateToPluginPage = useCallback(() => {
+        if (documentRedirectStarted.current) {
+            return true;
+        }
+        documentRedirectStarted.current = navigateToWebPushDocument(redirectTo, getSiteURL());
+        return documentRedirectStarted.current;
+    }, [redirectTo]);
 
     const [loginId, setLoginId] = useState(extraParam === Constants.SIGNIN_VERIFIED && emailParam ? emailParam : '');
     const [password, setPassword] = useState('');
@@ -480,6 +490,9 @@ const Login = ({onCustomizeHeader}: LoginProps) => {
         }
 
         if (currentUser) {
+            if (navigateToPluginPage()) {
+                return;
+            }
             if (redirectTo && redirectTo.match(/^\/([^/]|$)/)) {
                 history.push(redirectTo);
                 return;
@@ -792,6 +805,9 @@ const Login = ({onCustomizeHeader}: LoginProps) => {
         // a user is notified of successful login, we can set it back to "true"
         LocalStorageStore.setWasNotifiedOfLogIn(false);
 
+        if (navigateToPluginPage()) {
+            return;
+        }
         if (redirectTo && redirectTo.match(/^\/([^/]|$)/)) {
             history.push(redirectTo);
         } else if (team) {
