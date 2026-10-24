@@ -105,6 +105,11 @@ export default function WithTooltip({
 }: Props) {
     const [open, setOpen] = useState(false);
 
+    // iOS may consume the first tap when hover/focus inserts a tooltip before
+    // click. Keep the original control and its native action on managed mobile.
+    const suppressMobileTooltip = document.documentElement.classList.contains('mmwp-fixed-viewport');
+    const tooltipEnabled = !disabled && !suppressMobileTooltip;
+
     const arrowRef = useRef(null);
 
     function handleChange(open: boolean) {
@@ -134,7 +139,7 @@ export default function WithTooltip({
     }, [isVertical]);
 
     const {refs: {setReference, setFloating}, floatingStyles, context: floatingContext} = useFloating({
-        open: disabled ? false : open,
+        open: tooltipEnabled ? open : false,
         onOpenChange: handleChange,
         whileElementsMounted: autoUpdate,
         placement: placements.initial,
@@ -152,15 +157,17 @@ export default function WithTooltip({
     const {isMounted, styles: transitionStyles} = useTransitionStyles(floatingContext, TRANSITION_STYLE_PROPS);
 
     const hover = useHover(floatingContext, {
+        enabled: tooltipEnabled,
+        mouseOnly: true,
         restMs: OverlaysTimings.CURSOR_REST_TIME_BEFORE_OPEN,
         delay: {
             open: OverlaysTimings.CURSOR_MOUSEOVER_TO_OPEN,
             close: delayClose ? OverlaysTimings.CURSOR_MOUSEOUT_TO_CLOSE_WITH_DELAY : OverlaysTimings.CURSOR_MOUSEOUT_TO_CLOSE,
         },
     });
-    const focus = useFocus(floatingContext);
-    const dismiss = useDismiss(floatingContext);
-    const role = useRole(floatingContext, {role: 'tooltip'});
+    const focus = useFocus(floatingContext, {enabled: tooltipEnabled});
+    const dismiss = useDismiss(floatingContext, {enabled: tooltipEnabled});
+    const role = useRole(floatingContext, {role: 'tooltip', enabled: tooltipEnabled});
 
     const {getReferenceProps, getFloatingProps} = useInteractions([hover, focus, dismiss, role]);
 
@@ -170,6 +177,10 @@ export default function WithTooltip({
     }
 
     const mergedRefs = useMergeRefs([setReference, (children as any)?.ref]);
+
+    if (suppressMobileTooltip) {
+        return children;
+    }
 
     const trigger = cloneElement(
         children,

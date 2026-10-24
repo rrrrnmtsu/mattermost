@@ -14,6 +14,7 @@ import {getIsMobileView} from 'selectors/views/browser';
 import {makeAsyncComponent} from 'components/async_load';
 import CenterChannel from 'components/channel_layout/center_channel';
 import LoadingScreen from 'components/loading_screen';
+import MobileBottomNav from 'components/mobile_bottom_nav';
 import QueryParamActionController from 'components/query_param_actions/query_param_action_controller';
 import Sidebar from 'components/sidebar';
 import CRTPostsChannelResetWatcher from 'components/threading/channel_threads/posts_channel_reset_watcher';
@@ -89,6 +90,7 @@ export default function ChannelController(props: Props) {
                 </div>
             </div>
             {isMobileView && <MobileSidebarRight/>}
+            {isMobileView && <MobileBottomNav/>}
         </>
     );
 }

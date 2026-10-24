@@ -25,6 +25,7 @@ import {removeDraft, updateDraft} from 'actions/views/drafts';
 import {openModal} from 'actions/views/modals';
 import {makeGetDraft} from 'selectors/drafts';
 import {getSelectedPostFocussedAt} from 'selectors/rhs';
+import {getIsMobileView} from 'selectors/views/browser';
 import {connectionErrorCount} from 'selectors/views/system';
 import LocalStorageStore from 'stores/local_storage_store';
 
@@ -73,6 +74,7 @@ import EditPostFooter from './edit_post_footer';
 import Footer from './footer';
 import FormattingBar from './formatting_bar';
 import {FormattingBarSpacer, Separator} from './formatting_bar/formatting_bar';
+import HelpButton from './help_button';
 import MessageWithMentionsFooter from './message_with_mentions_footer';
 import SendButton from './send_button';
 import ShowFormat from './show_formatting';
@@ -165,6 +167,8 @@ const AdvancedTextEditor = ({
     };
 
     const currentUserId = useSelector(getCurrentUserId);
+    const isMobileViewport = useSelector(getIsMobileView);
+    const isMobileView = isMobileViewport || document.documentElement.classList.contains('mmwp-fixed-viewport');
     const channel = useSelector((state: GlobalState) => getChannelSelector(state, channelId));
     const channelDisplayName = channel?.display_name || '';
     const channelType = channel?.type || '';
@@ -223,13 +227,14 @@ const AdvancedTextEditor = ({
     const [serverError, setServerError] = useState<(ServerError & { submittedMessage?: string }) | null>(null);
     const [postError, setPostError] = useState<React.ReactNode>(null);
     const [showPreview, setShowPreview] = useState(false);
+    const [mobileToolsOpen, setMobileToolsOpen] = useState(false);
     const [isMessageLong, setIsMessageLong] = useState(false);
     const [renderScrollbar, setRenderScrollbar] = useState(false);
     const [keepEditorInFocus, setKeepEditorInFocus] = useState(false);
 
     const readOnlyChannel = !canPost;
     const hasDraftMessage = Boolean(draft.message);
-    const showFormattingBar = !isFormattingBarHidden && !readOnlyChannel;
+    const showFormattingBar = !readOnlyChannel && (isMobileView ? mobileToolsOpen : !isFormattingBarHidden);
     const enableSharedChannelsDMs = useSelector((state: GlobalState) => getFeatureFlagValue(state, 'EnableSharedChannelsDMs') === 'true');
     const isDMOrGMRemote = isChannelShared && (channelType === Constants.DM_CHANNEL || channelType === Constants.GM_CHANNEL);
 
@@ -302,6 +307,10 @@ const AdvancedTextEditor = ({
     }, [showPreview, handleDraftChange, draft]);
 
     const toggleAdvanceTextEditor = useCallback(() => {
+        if (isMobileView) {
+            setMobileToolsOpen((open) => !open);
+            return;
+        }
         dispatch(savePreferences(currentUserId, [{
             category: Preferences.ADVANCED_TEXT_EDITOR,
             user_id: currentUserId,
@@ -310,7 +319,7 @@ const AdvancedTextEditor = ({
             name: getFormattingBarPreferenceName(),
             value: String(!isFormattingBarHidden),
         }]));
-    }, [dispatch, currentUserId, getFormattingBarPreferenceName, isFormattingBarHidden]);
+    }, [dispatch, currentUserId, getFormattingBarPreferenceName, isFormattingBarHidden, isMobileView]);
 
     useOrientationHandler(textboxRef, rootId);
     const pluginItems = usePluginItems(draft, textboxRef, handleDraftChange, channelId);
@@ -734,6 +743,7 @@ const AdvancedTextEditor = ({
                     additionalControls={additionalControls}
                     location={location}
                     aiActionsMenu={aiActionsMenu}
+                    mobile={isMobileView}
                 />
             )}
             slot2={null}
@@ -765,12 +775,14 @@ const AdvancedTextEditor = ({
     const showFormattingSpacer = isMessageLong || showPreview || attachmentPreview || isRHS || isThreadView;
 
     const containsAtMentionsInMessage = allAtMentions(draft?.message)?.length > 0;
+    const mobileToolsId = `${textboxId}-mobile-tools`;
+    const toggleMobileTools = () => setMobileToolsOpen((open) => !open);
 
     return (
         <form
             id={rootId ? undefined : 'create_post'}
             data-testid={rootId ? undefined : 'create-post'}
-            className={(!rootId && !fullWidthTextBox) ? 'center' : undefined}
+            className={classNames({center: !rootId && !fullWidthTextBox, 'sakura-mobile-editor': isMobileView}) || undefined}
             onSubmit={handleSubmitWithEvent}
         >
             {canPost && (draft.fileInfos.length > 0 || draft.uploadsInProgress.length > 0) && (
@@ -790,6 +802,7 @@ const AdvancedTextEditor = ({
                     'AdvancedTextEditor__attachment-disabled': !canUploadFiles,
                     scroll: renderScrollbar,
                     'formatting-bar': showFormattingBar,
+                    'AdvancedTextEditor--mobile': isMobileView,
                 })}
             >
                 {!wasNotifiedOfLogIn && (
@@ -853,34 +866,76 @@ const AdvancedTextEditor = ({
                             onWidthChange={handleWidthChange}
                         />
                         {attachmentPreview}
-                        {!isDisabled && (showFormattingBar || showPreview) && (
-                            <TexteditorActions
-                                placement='top'
-                                isScrollbarRendered={renderScrollbar}
-                            >
-                                {showFormatJSX}
-                            </TexteditorActions>
-                        )}
-                        {showFormattingSpacer ? (
-                            <FormattingBarSpacer>
-                                {formattingBar}
-                            </FormattingBarSpacer>
-                        ) : formattingBar}
-                        {!isDisabled && (
-                            <TexteditorActions
-                                ref={editorActionsRef}
-                                placement='bottom'
-                            >
-                                <ToggleFormattingBar
-                                    onClick={toggleAdvanceTextEditor}
-                                    active={showFormattingBar}
-                                    disabled={showPreview}
-                                />
-                                <Separator/>
-                                {fileUploadJSX}
-                                {emojiPicker}
-                                {sendButton}
-                            </TexteditorActions>
+                        {isMobileView ? (
+                            <>
+                                {!isDisabled && mobileToolsOpen && (
+                                    <div
+                                        id={mobileToolsId}
+                                        className='AdvancedTextEditor__mobile-tools'
+                                        role='group'
+                                        aria-label={formatMessage({id: 'sakura.mobileComposer.tools', defaultMessage: 'Additional message actions'})}
+                                    >
+                                        {formattingBar}
+                                        <div className='AdvancedTextEditor__mobile-tools-extras'>
+                                            {showFormatJSX}
+                                            {emojiPicker}
+                                            <HelpButton/>
+                                        </div>
+                                    </div>
+                                )}
+                                {!isDisabled && (
+                                    <TexteditorActions
+                                        ref={editorActionsRef}
+                                        placement='bottom'
+                                        className='AdvancedTextEditor__mobile-actions'
+                                    >
+                                        {fileUploadJSX}
+                                        <button
+                                            type='button'
+                                            className='AdvancedTextEditor__mobile-more'
+                                            data-testid='mobileComposerMore'
+                                            aria-expanded={mobileToolsOpen}
+                                            aria-controls={mobileToolsId}
+                                            onClick={toggleMobileTools}
+                                        >
+                                            {mobileToolsOpen ? formatMessage({id: 'sakura.mobileComposer.close', defaultMessage: 'Close'}) : formatMessage({id: 'sakura.mobileComposer.more', defaultMessage: 'More'})}
+                                        </button>
+                                        {sendButton}
+                                    </TexteditorActions>
+                                )}
+                            </>
+                        ) : (
+                            <>
+                                {!isDisabled && (showFormattingBar || showPreview) && (
+                                    <TexteditorActions
+                                        placement='top'
+                                        isScrollbarRendered={renderScrollbar}
+                                    >
+                                        {showFormatJSX}
+                                    </TexteditorActions>
+                                )}
+                                {showFormattingSpacer ? (
+                                    <FormattingBarSpacer>
+                                        {formattingBar}
+                                    </FormattingBarSpacer>
+                                ) : formattingBar}
+                                {!isDisabled && (
+                                    <TexteditorActions
+                                        ref={editorActionsRef}
+                                        placement='bottom'
+                                    >
+                                        <ToggleFormattingBar
+                                            onClick={toggleAdvanceTextEditor}
+                                            active={showFormattingBar}
+                                            disabled={showPreview}
+                                        />
+                                        <Separator/>
+                                        {fileUploadJSX}
+                                        {emojiPicker}
+                                        {sendButton}
+                                    </TexteditorActions>
+                                )}
+                            </>
                         )}
                     </div>
                     {showSendTutorialTip && (
@@ -903,6 +958,7 @@ const AdvancedTextEditor = ({
                 rootId={rootId}
                 noArgumentHandleSubmit={handleSubmitWrapper}
                 isInEditMode={isInEditMode}
+                showHelp={!isMobileView || readOnlyChannel}
             />
             {isInEditMode && (
                 <EditPostFooter

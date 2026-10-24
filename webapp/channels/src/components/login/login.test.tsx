@@ -4,6 +4,7 @@
 import {createMemoryHistory} from 'history';
 import React from 'react';
 
+import * as userActions from 'mattermost-redux/actions/users';
 import {RequestStatus} from 'mattermost-redux/constants';
 
 import * as loginActions from 'actions/views/login';
@@ -17,6 +18,7 @@ import Constants, {WindowSizes} from 'utils/constants';
 import DesktopApp from 'utils/desktop_api';
 import {showNotification} from 'utils/notifications';
 import {isDesktopApp} from 'utils/user_agent';
+import * as WebPushRedirect from 'utils/webpush_login_redirect';
 
 import type {GlobalState} from 'types/store';
 
@@ -406,6 +408,45 @@ describe('components/login/Login', () => {
         );
 
         expect(history.push).toHaveBeenCalledWith(redirectPath);
+    });
+
+    it('uses document navigation for an authenticated Web Push page without a SPA push', () => {
+        const path = '/plugins/com.sakura.mattermost-webpush/setup';
+        const navigation = jest.spyOn(WebPushRedirect, 'navigateToWebPushDocument').mockReturnValue(true);
+        const history = createMemoryHistory({initialEntries: [{search: '?redirect_to=' + encodeURIComponent(path)}]});
+        const push = jest.spyOn(history, 'push');
+        const state = mergeObjects(baseState, {entities: {users: {currentUserId: 'user1'}}});
+
+        renderWithContext(<Login/>, state, {history});
+
+        expect(navigation).toHaveBeenCalledTimes(1);
+        expect(navigation).toHaveBeenCalledWith(path, expect.any(String));
+        expect(push).not.toHaveBeenCalled();
+        navigation.mockRestore();
+    });
+
+    it('uses document navigation after successful sign-in to a Web Push open page', async () => {
+        const path = '/plugins/com.sakura.mattermost-webpush/open/' + 'a'.repeat(43);
+        const navigation = jest.spyOn(WebPushRedirect, 'navigateToWebPushDocument').mockReturnValue(true);
+        const signIn = jest.spyOn(loginActions, 'login').mockImplementation(jest.fn().mockReturnValue(async () => ({data: true})));
+        const loadMe = jest.spyOn(userActions, 'loadMe').mockImplementation(jest.fn().mockReturnValue(async () => ({data: true})));
+        const history = createMemoryHistory({initialEntries: [{search: '?redirect_to=' + encodeURIComponent(path)}]});
+        const push = jest.spyOn(history, 'push');
+        const state = mergeObjects(baseState, {entities: {general: {config: {EnableSignInWithEmail: 'true'}}}});
+        renderWithContext(<Login/>, state, {history});
+
+        await userEvent.type(screen.getByLabelText('Email'), 'fixture@example.invalid');
+        await userEvent.type(screen.getByLabelText('Password'), 'test-password123');
+        await userEvent.click(screen.getByRole('button', {name: 'Log in'}));
+
+        expect(signIn).toHaveBeenCalled();
+        expect(loadMe).toHaveBeenCalled();
+        expect(navigation).toHaveBeenCalledTimes(1);
+        expect(navigation).toHaveBeenCalledWith(path, expect.any(String));
+        expect(push).not.toHaveBeenCalled();
+        navigation.mockRestore();
+        signIn.mockRestore();
+        loadMe.mockRestore();
     });
 
     it('should not show dont have an account when open server is disabled', () => {

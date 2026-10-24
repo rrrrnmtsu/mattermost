@@ -11,6 +11,7 @@ import testConfigureStore from 'packages/mattermost-redux/test/test_store';
 import {renderWithContext, waitFor} from 'tests/react_testing_utils';
 import * as BrowserUtils from 'utils/browser_utils';
 import {StoragePrefixes} from 'utils/constants';
+import * as MobileViewport from 'utils/mobile_viewport';
 
 import {handleLoginLogoutSignal, redirectToOnboardingOrDefaultTeam} from './actions';
 import type {Props} from './root';
@@ -244,6 +245,19 @@ describe('components/Root', () => {
             await waitFor(() => {
                 expect(landingProps.history.push).toHaveBeenCalledWith('/landing#/');
             });
+        });
+
+        test('keeps a Home Screen web app on its original destination', async () => {
+            const homeScreen = jest.spyOn(MobileViewport, 'isHomeScreenWebApp').mockReturnValue(true);
+            const props = {
+                ...landingProps,
+                history: {...landingProps.history, push: jest.fn()},
+            };
+
+            renderWithContext(<Root {...props}/>);
+
+            await waitFor(() => expect(homeScreen).toHaveBeenCalled());
+            expect(props.history.push).not.toHaveBeenCalled();
         });
 
         test('should not show for Desktop App login flow', async () => {

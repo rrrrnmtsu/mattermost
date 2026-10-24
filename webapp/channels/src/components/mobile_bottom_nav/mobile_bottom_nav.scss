@@ -1,0 +1,203 @@
+// Mobile navigation occupies its own grid row, never covers the composer.
+@media screen and (max-width: 768px) {
+    // Outrank the core mobile grid's body.app__body/#root:not(...) rule.
+    // Keep all three longhands together so a later core shorthand cannot leave
+    // mobile-nav undefined and create implicit columns or rows.
+    body.app__body.mmwp-mobile-nav #root.channel-view .main-wrapper {
+        min-height: 0;
+        grid-template-areas: "main" "mobile-nav";
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: minmax(0, 1fr) auto;
+    }
+
+    body.mmwp-mobile-single-team #root {
+        .team-sidebar {
+            display: none;
+        }
+
+        #SidebarContainer.move--right {
+            left: 0;
+        }
+    }
+
+    .mmwp-MobileNav {
+        z-index: 20;
+        min-width: 0;
+        background: var(--center-channel-bg);
+        color: var(--center-channel-color);
+        grid-area: mobile-nav;
+
+        &[hidden] {
+            display: none;
+        }
+
+        &__bar {
+            display: grid;
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+            border-top: 1px solid rgba(var(--center-channel-color-rgb), 0.16);
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+
+            > button {
+                display: flex;
+                min-width: 44px;
+                min-height: 56px;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: 5px 2px;
+                border: 0;
+                background: transparent;
+                color: inherit;
+                font-size: 12px;
+                line-height: 16px;
+
+                > .icon {
+                    font-size: 22px;
+                    line-height: 24px;
+                }
+
+                &[aria-expanded='true'] {
+                    background: rgba(var(--button-bg-rgb), 0.12);
+                    color: var(--button-bg);
+                }
+
+                &:focus-visible {
+                    outline: 2px solid var(--button-bg);
+                    outline-offset: -3px;
+                }
+            }
+        }
+
+        &__panel {
+            position: absolute;
+            z-index: 21;
+            right: 0;
+            bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+            left: 0;
+            overflow: auto;
+            max-height: min(65dvh, calc(100% - 70px));
+            padding: 8px 12px 12px;
+            border: 1px solid rgba(var(--center-channel-color-rgb), 0.16);
+            border-radius: 12px 12px 0 0;
+            background: var(--center-channel-bg);
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.16);
+        }
+
+        &__panelHeader {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+
+            h2 {
+                min-width: 0;
+                margin: 8px 0;
+                font-size: 18px;
+                line-height: 24px;
+            }
+
+            > button {
+                min-width: 44px;
+                min-height: 44px;
+                border: 0;
+                background: transparent;
+                color: inherit;
+                font-size: 22px;
+            }
+        }
+
+        &__action {
+            display: flex;
+            width: 100%;
+            min-height: 48px;
+            align-items: center;
+            padding: 10px 8px;
+            border: 0;
+            border-bottom: 1px solid rgba(var(--center-channel-color-rgb), 0.1);
+            background: transparent;
+            color: var(--link-color);
+            font-size: 16px;
+            text-align: left;
+        }
+
+        &__conversations {
+            padding: 0;
+            margin: 0;
+            list-style: none;
+
+            a {
+                display: flex;
+                min-height: 48px;
+                align-items: center;
+                padding: 10px 8px;
+                color: inherit;
+                gap: 10px;
+
+                span {
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+            }
+        }
+
+        &__empty {
+            padding: 12px 8px;
+            margin: 0;
+            color: rgba(var(--center-channel-color-rgb), 0.72);
+            font-size: 14px;
+        }
+    }
+
+    // Keep the core settings content readable inside this mobile navigation.
+    body.mmwp-mobile-nav #accountSettingsModal .modal-body > div,
+    body.mmwp-mobile-nav #accountSettingsModal .GenericModal__body > div,
+    body.mmwp-mobile-nav #accountSettingsModal .settings-content > div,
+    body.mmwp-mobile-nav #accountSettingsModal .settings-content > div > div,
+    body.mmwp-mobile-nav #accountSettingsModal .settings-table,
+    body.mmwp-mobile-nav #accountSettingsModal .settings-content,
+    body.mmwp-mobile-nav #accountSettingsModal .user-settings {
+        min-width: 0;
+        max-width: 100%;
+    }
+    body.mmwp-mobile-nav #accountSettingsModal .GenericModal__body > div,
+    body.mmwp-mobile-nav #accountSettingsModal .settings-content > div,
+    body.mmwp-mobile-nav #accountSettingsModal .settings-content > div > div,
+    body.mmwp-mobile-nav #accountSettingsModal .settings-content,
+    body.mmwp-mobile-nav #accountSettingsModal .user-settings {
+        width: 100%;
+    }
+    body.mmwp-mobile-nav #accountSettingsModal .settings-content .user-settings {
+        padding: 16px;
+    }
+    body.mmwp-mobile-nav #accountSettingsModal .section-min__header,
+    body.mmwp-mobile-nav #accountSettingsModal .section-min__title {
+        min-width: 0;
+        flex-wrap: wrap;
+    }
+    body.mmwp-mobile-nav #accountSettingsModal .section-min__title {
+        padding-right: 0;
+    }
+    body.mmwp-mobile-nav #accountSettingsModal .section-min__describe {
+        overflow-wrap: anywhere;
+        white-space: pre-wrap;
+    }
+    body.mmwp-mobile-nav #accountSettingsModal .security-links {
+        max-width: 100%;
+        overflow-wrap: anywhere;
+        white-space: normal;
+    }
+    body.mmwp-mobile-nav #accountSettingsModal .sectionNoticeContent,
+    body.mmwp-mobile-nav #accountSettingsModal .sectionNoticeBody {
+        min-width: 0;
+        max-width: 100%;
+    }
+    body.mmwp-mobile-nav #accountSettingsModal .sectionNoticeContent {
+        flex-direction: column;
+    }
+    body.mmwp-mobile-nav #accountSettingsModal .sectionNoticeButton {
+        max-width: 100%;
+        overflow-wrap: anywhere;
+        white-space: normal;
+    }
+}

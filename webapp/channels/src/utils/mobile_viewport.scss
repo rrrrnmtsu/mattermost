@@ -1,0 +1,43 @@
+// Managed mobile layout. Keep the composer readable without widening it.
+html.mmwp-fixed-viewport {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    touch-action: pan-x pan-y;
+
+    body {
+        textarea,
+        [contenteditable='true'],
+        input:not([type]),
+        input:is(
+            [type='text'], [type='search'], [type='email'], [type='password'],
+            [type='url'], [type='tel'], [type='number']
+        ) {
+            // Bootstrap's .form-control outranks the generic textarea rule.
+            // Preserve the minimum even when editor styles load in a later chunk.
+            font-size: max(16px, 1em) !important;
+        }
+    }
+}
+
+@media screen and (max-width: 768px) {
+    body.ios.app__body {
+        #root .main-wrapper {
+            overflow: clip;
+        }
+
+        #sidebar-menu.sidebar--menu {
+            max-width: 100%;
+            overflow-x: hidden;
+            pointer-events: none;
+            transform: none;
+            transition: none;
+            visibility: hidden;
+
+            &.move--left {
+                pointer-events: auto;
+                transform: none;
+                visibility: visible;
+            }
+        }
+    }
+}
