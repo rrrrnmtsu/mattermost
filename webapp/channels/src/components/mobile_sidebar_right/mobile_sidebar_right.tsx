@@ -25,7 +25,7 @@ const MobileRightDrawer = ({
 
     useEffect(() => {
         if (isOpen && sidebarRef.current) {
-            sidebarRef.current.focus();
+            sidebarRef.current.focus({preventScroll: true});
         }
     }, [isOpen]);
 
