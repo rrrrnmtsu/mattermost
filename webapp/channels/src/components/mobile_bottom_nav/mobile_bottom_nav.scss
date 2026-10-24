@@ -1,7 +1,12 @@
 // Mobile navigation occupies its own grid row, never covers the composer.
 @media screen and (max-width: 768px) {
-    body.mmwp-mobile-nav #root .main-wrapper {
-        grid-template: "main" minmax(0, 1fr) "mobile-nav" auto;
+    // Outrank the core mobile grid's body.app__body/#root:not(...) rule.
+    // Keep all three longhands together so a later core shorthand cannot leave
+    // mobile-nav undefined and create implicit columns or rows.
+    body.app__body.mmwp-mobile-nav #root.channel-view .main-wrapper {
+        grid-template-areas: "main" "mobile-nav";
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: minmax(0, 1fr) auto;
     }
 
     body.mmwp-mobile-single-team #root {
