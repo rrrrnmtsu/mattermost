@@ -3,7 +3,7 @@
 
 /* eslint indent: ["error", 2], @typescript-eslint/indent: ["error", 2] */
 
-import {fixedMobileViewport, initializeMobileViewport} from './mobile_viewport';
+import {fixedMobileViewport, initializeMobileViewport, isHomeScreenWebApp} from './mobile_viewport';
 
 describe('managed mobile viewport', () => {
   let dispose: (() => void) | undefined;
@@ -70,5 +70,28 @@ describe('managed mobile viewport', () => {
     window.dispatchEvent(event);
     expect(event.defaultPrevented).toBe(false);
     expect(document.querySelector('meta')?.getAttribute('content')).toBe('width=device-width,initial-scale=1');
+  });
+});
+
+describe('Home Screen web app entry', () => {
+  afterEach(() => {
+    Object.defineProperty(navigator, 'standalone', {configurable: true, value: undefined});
+  });
+
+  test.each(['standalone', 'fullscreen'])('recognizes display-mode %s', (mode) => {
+    Object.defineProperty(window, 'matchMedia', {configurable: true, value: jest.fn((query) => ({matches: query === `(display-mode: ${mode})`}))});
+    expect(isHomeScreenWebApp()).toBe(true);
+  });
+
+  test('recognizes the iOS Home Screen flag', () => {
+    Object.defineProperty(window, 'matchMedia', {configurable: true, value: jest.fn(() => ({matches: false}))});
+    Object.defineProperty(navigator, 'standalone', {configurable: true, value: true});
+    expect(isHomeScreenWebApp()).toBe(true);
+  });
+
+  test('retains the normal browser entry', () => {
+    Object.defineProperty(window, 'matchMedia', {configurable: true, value: jest.fn(() => ({matches: false}))});
+    Object.defineProperty(navigator, 'standalone', {configurable: true, value: false});
+    expect(isHomeScreenWebApp()).toBe(false);
   });
 });

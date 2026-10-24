@@ -135,6 +135,9 @@ interface FormattingBarProps {
      * AI actions menu rendered at the far left of the formatting bar
      */
     aiActionsMenu?: React.ReactNode;
+
+    /** Wrap all controls in the explicit mobile tools panel. */
+    mobile?: boolean;
 }
 
 const DEFAULT_MIN_MODE_X_COORD = 55;
@@ -148,6 +151,7 @@ const FormattingBar = (props: FormattingBarProps): JSX.Element => {
         location,
         additionalControls,
         aiActionsMenu,
+        mobile = false,
     } = props;
     const [showHiddenControls, setShowHiddenControls] = useState(false);
 
@@ -181,7 +185,8 @@ const FormattingBar = (props: FormattingBarProps): JSX.Element => {
         update?.();
     }, [layoutMode, update, showHiddenControls]);
 
-    const hasHiddenControls = layoutMode !== LayoutModes.Wide;
+    const hasHiddenControls = !mobile && layoutMode !== LayoutModes.Wide;
+    const visibleControls = mobile ? [...controls, ...hiddenControls] : controls;
 
     /**
      * wrapping this factory in useCallback prevents it from constantly getting a new
@@ -224,16 +229,17 @@ const FormattingBar = (props: FormattingBarProps): JSX.Element => {
         left: leftPosition,
     };
 
-    const showSeparators = layoutMode === LayoutModes.Wide;
+    const showSeparators = !mobile && layoutMode === LayoutModes.Wide;
 
     return (
         <FormattingBarContainer
             ref={formattingBarRef}
             data-testid='formattingBarContainer'
+            className={mobile ? 'AdvancedTextEditor__mobile-formatting' : undefined}
         >
             {aiActionsMenu}
             {aiActionsMenu && showSeparators && <Separator/>}
-            {controls.map((mode) => {
+            {visibleControls.map((mode) => {
                 return (
                     <React.Fragment key={mode}>
                         <FormattingIcon

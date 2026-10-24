@@ -5,6 +5,13 @@
 
 export const fixedMobileViewport = 'width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no';
 
+/** Home Screen apps already chose the web client and need no native-app chooser. */
+export function isHomeScreenWebApp(): boolean {
+  return window.matchMedia('(display-mode: standalone)').matches ||
+    window.matchMedia('(display-mode: fullscreen)').matches ||
+    Boolean((navigator as Navigator & {standalone?: boolean}).standalone);
+}
+
 /** Apply the managed mobile viewport policy without intercepting text input. */
 export function initializeMobileViewport(): (() => void) | undefined {
   const mobile = (/iPhone|iPad|iPod|Android|Mobile/i).test(navigator.userAgent) ||

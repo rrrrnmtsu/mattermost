@@ -251,3 +251,136 @@
     text-overflow: ellipsis;
     white-space: nowrap;
 }
+
+
+// Mobile controls use the native button actions in a dedicated flow row.
+// The editor and its draft remain mounted when optional tools are collapsed.
+.sakura-mobile-editor {
+    min-width: 0;
+
+    .AdvancedTextEditor--mobile {
+        padding: 0;
+        gap: 0;
+
+        .AdvancedTextEditor__body,
+        .AdvancedTextEditor__cell {
+            min-width: 0;
+        }
+
+        .custom-textarea {
+            min-height: 52px;
+            padding-right: 16px;
+            font-size: 16px;
+        }
+    }
+
+    .AdvancedTextEditor__mobile-actions {
+        position: static;
+        display: flex;
+        width: 100%;
+        min-height: 56px;
+        flex-shrink: 0;
+        align-items: center;
+        padding: 4px 8px;
+        gap: 6px;
+
+        button {
+            min-width: 44px;
+            min-height: 44px;
+        }
+
+        .AdvancedTextEditor__action-button {
+            width: 44px;
+            height: 44px;
+        }
+
+        .splitSendButton {
+            width: 48px;
+            height: 48px;
+            flex-shrink: 0;
+            margin-left: auto;
+
+            &.scheduledPost {
+                width: 92px;
+            }
+
+            .SendMessageButton {
+                min-width: 48px;
+                min-height: 48px;
+            }
+
+            .button_send_post_options {
+                width: 44px;
+            }
+        }
+    }
+
+    .AdvancedTextEditor__mobile-more {
+        padding: 0 10px;
+        border: none;
+        border-radius: 6px;
+        background: rgba(var(--center-channel-color-rgb), 0.06);
+        color: var(--center-channel-color);
+        font-size: 14px;
+        font-weight: 600;
+        white-space: nowrap;
+
+        &[aria-expanded='true'] {
+            background: rgba(var(--button-bg-rgb), 0.12);
+            color: var(--button-bg);
+        }
+    }
+
+    .AdvancedTextEditor__mobile-tools {
+        max-height: min(40vh, 180px);
+        padding: 4px 8px;
+        border-top: 1px solid rgba(var(--center-channel-color-rgb), 0.12);
+        overflow-y: auto;
+        overscroll-behavior: contain;
+
+        button {
+            min-width: 44px;
+            min-height: 44px;
+            flex-shrink: 0;
+        }
+
+        .AdvancedTextEditor__mobile-formatting {
+            width: 100%;
+            height: auto;
+            min-height: 44px;
+            flex-wrap: wrap;
+            padding: 0;
+            gap: 2px;
+        }
+
+        .AdvancedTextEditor__mobile-tools-extras {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .HelpButton {
+            height: 44px;
+            margin-left: auto;
+        }
+    }
+
+    .AdvancedTextEditor__footer {
+        padding-right: 8px;
+        padding-left: 8px;
+    }
+
+    .post-body__footer {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        padding: 4px 8px;
+        gap: 6px;
+
+        button {
+            min-width: 64px;
+            min-height: 44px;
+        }
+    }
+}

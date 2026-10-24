@@ -12,7 +12,7 @@ import type Textbox from 'components/textbox/textbox';
 
 import mergeObjects from 'packages/mattermost-redux/test/merge_objects';
 import {renderWithContext, userEvent, screen} from 'tests/react_testing_utils';
-import Constants, {Locations, StoragePrefixes} from 'utils/constants';
+import Constants, {Locations, StoragePrefixes, WindowSizes} from 'utils/constants';
 import {TestHelper} from 'utils/test_helper';
 
 import type {PostDraft} from 'types/store/draft';
@@ -195,6 +195,59 @@ const baseProps = {
 };
 
 describe('components/avanced_text_editor/advanced_text_editor', () => {
+    describe('mobile composer tools', () => {
+        const mobileState = mergeObjects(initialState, {
+            views: {browser: {windowSize: WindowSizes.MOBILE_VIEW}},
+            storage: {
+                storage: {
+                    [StoragePrefixes.DRAFT + channelId]: {
+                        value: TestHelper.getPostDraftMock({message: 'Draft survives opening tools'}),
+                    },
+                },
+            },
+        });
+
+        it('keeps the draft and native send control while optional tools are opened and closed', async () => {
+            renderWithContext(<AdvancedTextEditor {...baseProps}/>, mobileState);
+            const textbox = screen.getByTestId('post_textbox');
+            const more = screen.getByTestId('mobileComposerMore');
+            expect(more).toHaveAttribute('type', 'button');
+            expect(more).toHaveAttribute('aria-expanded', 'false');
+            expect(screen.queryByTestId('formattingBarContainer')).not.toBeInTheDocument();
+            expect(screen.queryByRole('button', {name: 'Messaging help'})).not.toBeInTheDocument();
+            expect(screen.getByTestId('SendMessageButton')).toBeEnabled();
+
+            await userEvent.click(more);
+            expect(more).toHaveAttribute('aria-expanded', 'true');
+            const tools = screen.getByRole('group', {name: 'Additional message actions'});
+            expect(more).toHaveAttribute('aria-controls', tools.id);
+            expect(screen.getByTestId('formattingBarContainer')).toBeInTheDocument();
+            expect(screen.getByRole('button', {name: 'Messaging help'})).toBeInTheDocument();
+            expect(textbox).toHaveValue('Draft survives opening tools');
+
+            await userEvent.click(more);
+            expect(more).toHaveAttribute('aria-expanded', 'false');
+            expect(screen.queryByRole('group', {name: 'Additional message actions'})).not.toBeInTheDocument();
+            expect(textbox).toHaveValue('Draft survives opening tools');
+            expect(screen.getByTestId('SendMessageButton')).toBeEnabled();
+        });
+
+        it('retains the desktop formatting and help controls without a mobile toggle', () => {
+            renderWithContext(<AdvancedTextEditor {...baseProps}/>, initialState);
+            expect(screen.queryByTestId('mobileComposerMore')).not.toBeInTheDocument();
+            expect(screen.getByTestId('formattingBarContainer')).toBeInTheDocument();
+            expect(screen.getByRole('button', {name: 'Messaging help'})).toBeInTheDocument();
+        });
+
+        it('does not expose posting actions when the user lacks CREATE_POST permission', () => {
+            renderWithContext(<AdvancedTextEditor {...baseProps}/>, mergeObjects(mobileState, {
+                entities: {roles: {roles: {user_roles: {permissions: []}}}},
+            }));
+            expect(screen.queryByTestId('mobileComposerMore')).not.toBeInTheDocument();
+            expect(screen.queryByTestId('SendMessageButton')).not.toBeInTheDocument();
+        });
+    });
+
     describe('keyDown behavior', () => {
         it('ESC should blur the input', async () => {
             renderWithContext(

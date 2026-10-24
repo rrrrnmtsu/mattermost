@@ -56,6 +56,18 @@ describe('Footer Component', () => {
         });
     });
 
+    it('allows mobile to relocate help while retaining error messages', () => {
+        renderWithContext(
+            <Footer
+                {...baseProps}
+                showHelp={false}
+                postError={'Upload failed'}
+            />,
+        );
+        expect(screen.queryByRole('button', {name: 'Messaging help'})).not.toBeInTheDocument();
+        expect(screen.getByText('Upload failed')).toBeInTheDocument();
+    });
+
     describe('Footer structure', () => {
         it('should render the footer with correct id and role', () => {
             const {container} = renderWithContext(

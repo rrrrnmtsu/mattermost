@@ -32,6 +32,7 @@ import {expirationScheduler} from 'utils/burn_on_read_expiration_scheduler';
 import {PageLoadContext, SCHEDULED_POST_URL_SUFFIX} from 'utils/constants';
 import DesktopApp from 'utils/desktop_api';
 import {EmojiIndicesByAlias} from 'utils/emoji';
+import {isHomeScreenWebApp} from 'utils/mobile_viewport';
 import {TEAM_NAME_PATH_PATTERN} from 'utils/path';
 import {getSiteURL} from 'utils/url';
 import {isAndroidWeb, isChromebook, isDesktopApp, isIosWeb} from 'utils/user_agent';
@@ -124,7 +125,7 @@ export default class Root extends React.PureComponent<Props, State> {
 
         // We have nothing to redirect to if we're already on Desktop App
         // Chromebook has no Desktop App to switch to
-        if (isDesktopApp() || isChromebook()) {
+        if (isDesktopApp() || isChromebook() || isHomeScreenWebApp()) {
             return;
         }
 

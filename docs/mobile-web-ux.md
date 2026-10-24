@@ -11,7 +11,7 @@ by the viewport policy. Focus uses preventScroll when opening the menu.
 
 The policy is loaded from the first webapp entry and bundled CSS. It does not
 depend on reverse-proxy HTML substitution or injected external stylesheets.
-The `sakura-mobile-ux` HTML meta tag identifies this build as `11.7.14-mobile.2`.
+The `sakura-mobile-ux` HTML meta tag identifies this build as `11.7.14-mobile.3`.
 
 Build with the Node/npm versions in webapp/package.json and the committed
 lockfile. A lockfile-only repair aligns Rollup with the override already in
@@ -40,3 +40,29 @@ are absent. Desktop mouse hover and keyboard tooltips remain enabled. No
 synthetic click or global single-touch cancellation is added. Touch acceptance
 uses an actual touchscreen tap, including the nested workspace icon target,
 and verifies exactly one action/request per tap.
+
+
+Mobile.3 groups secondary composer tools behind a labeled button while keeping
+attachment and Send directly available. The text input stays mounted, and the
+existing submit, permissions, draft and IME logic remains in charge. The compact
+composer also applies to a managed phone in landscape. Desktop controls retain
+their original layout.
+
+At the existing mobile breakpoint (768 CSS px), a bottom navigation row opens
+chats, existing DMs, actual unread conversations, and settings. It reuses core
+selectors, router links and settings dialogs. Mentions are a separate action
+rather than being labeled unread. The row occupies layout space instead of
+covering Send, respects the bottom safe area, and folds while the keyboard
+reduces the viewport. A single joined team does not need a permanent team rail;
+multiple-team switching remains available.
+
+Home Screen standalone/fullscreen web apps skip the native-app chooser. Normal
+browser entry keeps the existing chooser. Push settings still use the separate
+plugin page; this fork does not change its API, payload, VAPID or worker policy.
+The deployment's separate plugin settings update distinguishes OS permission,
+server registration, test acceptance and the user's own on-device confirmation.
+
+Focused composer, navigation, routing, keyboard-viewport, Home Screen entry and
+previous tooltip tests accompany this patch. Public browser acceptance covers
+single-touch send, DM/unread navigation, settings, draft preservation and layout.
+A simulated standalone flag or reduced viewport is not physical iPhone evidence.

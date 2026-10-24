@@ -63,6 +63,21 @@ describe('FormattingBar', () => {
         expect(screen.queryByLabelText('show hidden formatting options')).not.toBeInTheDocument();
     });
 
+    test('exposes every formatting control inside the mobile tools panel without a nested overflow menu', () => {
+        jest.spyOn(Hooks, 'useFormattingBarControls').mockReturnValue({layoutMode: LayoutModes.Min, ...splitFormattingBarControls('min')});
+        renderWithContext(
+            <FormattingBar
+                {...baseProps}
+                mobile={true}
+            />,
+        );
+        expect(screen.queryByLabelText('show hidden formatting options')).not.toBeInTheDocument();
+        expect(screen.getByLabelText('bold')).toBeInTheDocument();
+        expect(screen.getByLabelText('heading')).toBeInTheDocument();
+        expect(screen.getByLabelText('numbered list')).toBeInTheDocument();
+        expect(screen.getByTestId('formattingBarContainer')).toHaveClass('AdvancedTextEditor__mobile-formatting');
+    });
+
     test('MM-56705 should not submit form when clicking on hidden formatting button', async () => {
         jest.spyOn(Hooks, 'useFormattingBarControls').mockReturnValue({layoutMode: LayoutModes.Narrow, ...splitFormattingBarControls('narrow')});
 
