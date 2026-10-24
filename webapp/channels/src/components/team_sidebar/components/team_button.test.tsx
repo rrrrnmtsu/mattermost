@@ -4,7 +4,7 @@
 import {screen} from '@testing-library/react';
 import React from 'react';
 
-import {renderWithContext} from 'tests/react_testing_utils';
+import {renderWithContext, userEvent} from 'tests/react_testing_utils';
 
 import TeamButton from './team_button';
 
@@ -90,6 +90,34 @@ describe('components/TeamSidebar/TeamButton', () => {
 
         expect(screen.queryByTestId('team-badge-')).not.toBeInTheDocument();
         expect(screen.getByTestId('team-container-')).not.toHaveClass('unread');
+    });
+
+    it('switches team once from a single mobile touch on the nested icon', async () => {
+        document.documentElement.classList.add('mmwp-fixed-viewport');
+        const switchTeam = jest.fn();
+        try {
+            renderWithContext(
+                <TeamButton
+                    {...baseProps}
+                    url='/second-team'
+                    displayName='Second Team'
+                    tip='Team caption'
+                    switchTeam={switchTeam}
+                />,
+            );
+            const link = screen.getByRole('link', {name: 'second team team'});
+            const icon = link.querySelector('.team-btn')!;
+            await userEvent.pointer([
+                {keys: '[TouchA>]', target: icon},
+                {keys: '[/TouchA]', target: icon},
+            ]);
+            expect(switchTeam).toHaveBeenCalledTimes(1);
+            expect(switchTeam).toHaveBeenCalledWith('/second-team');
+            expect(screen.queryByText('Team caption')).not.toBeInTheDocument();
+            expect(link).toHaveAccessibleName('second team team');
+        } finally {
+            document.documentElement.classList.remove('mmwp-fixed-viewport');
+        }
     });
 
     describe('aria-label accessibility', () => {

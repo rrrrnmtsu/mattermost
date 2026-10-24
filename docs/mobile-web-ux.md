@@ -11,7 +11,7 @@ by the viewport policy. Focus uses preventScroll when opening the menu.
 
 The policy is loaded from the first webapp entry and bundled CSS. It does not
 depend on reverse-proxy HTML substitution or injected external stylesheets.
-The `sakura-mobile-ux` HTML meta tag identifies this build as `11.7.14-mobile.1`.
+The `sakura-mobile-ux` HTML meta tag identifies this build as `11.7.14-mobile.2`.
 
 Build with the Node/npm versions in webapp/package.json and the committed
 lockfile. A lockfile-only repair aligns Rollup with the override already in
@@ -33,3 +33,10 @@ On each supported upstream security update, port only these patches to the
 matching version and rebuild. Do not update the API/server/DB version as
 part of a UI-only replacement. Submit generic input/menu fixes separately
 from the deployment-specific no-zoom policy if contributing upstream.
+
+Managed mobile controls bypass WithTooltip entirely: the original child retains
+its click/ref/accessible name, while tooltip hover/focus handlers and portals
+are absent. Desktop mouse hover and keyboard tooltips remain enabled. No
+synthetic click or global single-touch cancellation is added. Touch acceptance
+uses an actual touchscreen tap, including the nested workspace icon target,
+and verifies exactly one action/request per tap.
