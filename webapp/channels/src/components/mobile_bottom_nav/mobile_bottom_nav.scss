@@ -4,6 +4,7 @@
     // Keep all three longhands together so a later core shorthand cannot leave
     // mobile-nav undefined and create implicit columns or rows.
     body.app__body.mmwp-mobile-nav #root.channel-view .main-wrapper {
+        min-height: 0;
         grid-template-areas: "main" "mobile-nav";
         grid-template-columns: minmax(0, 1fr);
         grid-template-rows: minmax(0, 1fr) auto;
