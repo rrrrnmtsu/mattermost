@@ -2,9 +2,11 @@
 // See LICENSE.txt for license information.
 
 import React from 'react';
+import {createPortal} from 'react-dom';
 
 import Constants from 'utils/constants';
 
+import {isMobile} from './is_mobile_view_hack';
 import MenuWrapperAnimation from './menu_wrapper_animation';
 
 import './menu_wrapper.scss';
@@ -28,6 +30,7 @@ type Props = {
     isDisabled?: boolean;
     stopPropagationOnToggle?: boolean;
     open?: boolean;
+    portalOnMobile?: boolean;
 }
 
 type State = {
@@ -39,6 +42,7 @@ type State = {
  */
 export default class MenuWrapper extends React.PureComponent<Props, State> {
     private node: React.RefObject<HTMLDivElement>;
+    private portalNode = React.createRef<HTMLDivElement>();
 
     public static defaultProps = {
         className: '',
@@ -106,7 +110,7 @@ export default class MenuWrapper extends React.PureComponent<Props, State> {
     };
 
     private closeOnBlur = (e: Event) => {
-        if (this.node && this.node.current && e.target && this.node.current.contains(e.target as Node)) {
+        if (e.target && (this.node.current?.contains(e.target as Node) || this.portalNode.current?.contains(e.target as Node))) {
             return;
         }
 
@@ -145,6 +149,30 @@ export default class MenuWrapper extends React.PureComponent<Props, State> {
         const {children} = this.props;
 
         const Animation = this.props.animationComponent;
+        const menu = (
+            <Animation show={this.state.open}>
+                {children ? Object.values(children)[1] : {}}
+            </Animation>
+        );
+
+        // A fixed popup inside the virtualized post list inherits WebKit's
+        // scroller containing block. Keep this opt-in popup at the body level.
+        let popup: React.ReactNode = menu;
+        if (this.props.portalOnMobile && isMobile()) {
+            popup = null;
+            if (this.state.open) {
+                popup = createPortal(
+                    <div
+                        className='post mmwp-post-menu-portal'
+                        style={{display: 'contents'}}
+                        ref={this.portalNode}
+                    >
+                        {menu}
+                    </div>,
+                    document.body,
+                );
+            }
+        }
 
         return (
             <div
@@ -155,9 +183,7 @@ export default class MenuWrapper extends React.PureComponent<Props, State> {
                 disabled={this.props.isDisabled}
             >
                 {children ? Object.values(children)[0] : {}}
-                <Animation show={this.state.open}>
-                    {children ? Object.values(children)[1] : {}}
-                </Animation>
+                {popup}
             </div>
         );
     }

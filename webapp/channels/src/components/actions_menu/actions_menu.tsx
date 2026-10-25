@@ -352,6 +352,7 @@ export class ActionMenuClass extends React.PureComponent<Props, State> {
 
             return (
                 <MenuWrapper
+                    portalOnMobile={true}
                     open={this.props.isMenuOpen}
                     onToggle={this.handleDropdownOpened}
                 >
