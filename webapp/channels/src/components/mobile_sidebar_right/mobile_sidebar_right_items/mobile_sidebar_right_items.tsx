@@ -81,6 +81,7 @@ export class MobileSidebarRightItems extends React.PureComponent<Props> {
                 id={item.id + '_pluginmenuitem'}
                 key={item.id + '_pluginmenuitem'}
                 onClick={() => {
+                    this.props.actions.closeRhsMenu();
                     if (item.action) {
                         item.action();
                     }
