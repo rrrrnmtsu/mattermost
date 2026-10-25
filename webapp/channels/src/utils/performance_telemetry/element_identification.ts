@@ -43,3 +43,20 @@ export function identifyElementRegion(element: Element): ElementIdentifier {
 
     return 'other';
 }
+
+/** Resolve optional browser-generated selectors without breaking application events. */
+export function findPerformanceTarget(selector?: string): Element | null {
+    if (!selector) {
+        return null;
+    }
+
+    try {
+        return document.querySelector(selector);
+    } catch (error) {
+        // React useId targets can contain unescaped colons in web-vitals attribution.
+        if (error instanceof DOMException && error.name === 'SyntaxError') {
+            return null;
+        }
+        throw error;
+    }
+}

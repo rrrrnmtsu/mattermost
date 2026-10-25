@@ -14,7 +14,7 @@ import type {DesktopAppAPI} from 'utils/desktop_api';
 
 import type {GlobalState} from 'types/store';
 
-import {identifyElementRegion} from './element_identification';
+import {findPerformanceTarget, identifyElementRegion} from './element_identification';
 import type {PerformanceLongTaskTiming} from './long_task';
 import type {PlatformLabel, UserAgentLabel} from './platform_detection';
 import {getDesktopAppVersionLabel, getPlatformLabel, getUserAgentLabel} from './platform_detection';
@@ -248,7 +248,7 @@ export default class PerformanceReporter {
 
         if (isLCPMetric(metric)) {
             const selector = metric.attribution?.target;
-            const element = selector ? document.querySelector(selector) : null;
+            const element = findPerformanceTarget(selector);
 
             if (element) {
                 labels = {

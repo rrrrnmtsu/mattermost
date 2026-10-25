@@ -11,7 +11,7 @@ by the viewport policy. Focus uses preventScroll when opening the menu.
 
 The policy is loaded from the first webapp entry and bundled CSS. It does not
 depend on reverse-proxy HTML substitution or injected external stylesheets.
-The `sakura-mobile-ux` HTML meta tag identifies this build as `11.7.14-mobile.3.1`.
+The `sakura-mobile-ux` HTML meta tag identifies this build as `11.7.14-mobile.3.2`.
 
 Build with the Node/npm versions in webapp/package.json and the committed
 lockfile. A lockfile-only repair aligns Rollup with the override already in
@@ -75,3 +75,7 @@ page navigation. Other destinations keep the original SPA behavior. Reject
 external origins, query/fragment additions, encoded or normalized path tricks,
 and invalid job identifiers. The server still verifies the current session,
 active user and channel permission before opening a notification's target.
+
+## Plugin compatibility hotfix
+
+The performance reporter ignores malformed web-vitals target selectors, including unescaped React useId values from the onboarding task list. Metrics remain reportable without a region label. Existing chat, mobile navigation, notification and license behavior is unchanged.
