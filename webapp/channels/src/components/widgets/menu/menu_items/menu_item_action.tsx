@@ -8,6 +8,10 @@ import menuItem from './menu_item';
 
 type Props = {
     onClick: (e: React.MouseEvent) => void;
+    onTouchStart?: React.TouchEventHandler<HTMLButtonElement>;
+    onTouchMove?: React.TouchEventHandler<HTMLButtonElement>;
+    onTouchEnd?: React.TouchEventHandler<HTMLButtonElement>;
+    onTouchCancel?: React.TouchEventHandler<HTMLButtonElement>;
     text: React.ReactNode;
     extraText?: string;
     id?: string;
@@ -20,6 +24,10 @@ type Props = {
 }
 export const MenuItemActionImpl = ({
     onClick,
+    onTouchStart,
+    onTouchMove,
+    onTouchEnd,
+    onTouchCancel,
     text,
     extraText,
     id,
@@ -41,6 +49,10 @@ export const MenuItemActionImpl = ({
                 MenuItem__dangerous: isDangerous,
             })}
             onClick={onClick}
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEnd}
+            onTouchCancel={onTouchCancel}
             disabled={disabled}
         >
             {iconClassName && <i className={`icon ${iconClassName}`}/>}

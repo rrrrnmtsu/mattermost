@@ -19,6 +19,7 @@ import Pluggable from 'plugins/pluggable';
 import {createCallContext} from 'utils/apps';
 import {Constants, Locations, ModalIdentifiers} from 'utils/constants';
 import * as PostUtils from 'utils/post_utils';
+import {TouchMenuAction} from 'utils/touch_menu_action';
 
 import type {ModalData} from 'types/actions';
 import type {HandleBindingClick, OpenAppsModal, PostEphemeralCallResponseForPost} from 'types/apps';
@@ -93,6 +94,7 @@ export class ActionMenuClass extends React.PureComponent<Props, State> {
         pluginMenuItems: [],
     };
     private buttonElement: HTMLButtonElement | null = null;
+    private readonly pluginTouchAction = new TouchMenuAction();
 
     constructor(props: Props) {
         super(props);
@@ -262,6 +264,13 @@ export class ActionMenuClass extends React.PureComponent<Props, State> {
                     <Menu.ItemAction
                         key={item.id + '_pluginmenuitem'}
                         text={item.text}
+                        onTouchStart={(event) => this.pluginTouchAction.start(event)}
+                        onTouchMove={(event) => this.pluginTouchAction.move(event)}
+                        onTouchCancel={() => this.pluginTouchAction.cancel()}
+                        onTouchEnd={(event) => this.pluginTouchAction.end(event, () => {
+                            this.closeDropdown();
+                            item.action?.(this.props.post.id);
+                        })}
                         onClick={() => {
                             if (item.action) {
                                 item.action(this.props.post.id);

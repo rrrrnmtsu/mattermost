@@ -79,3 +79,5 @@ active user and channel permission before opening a notification's target.
 ## Plugin compatibility hotfix
 
 The performance reporter ignores malformed web-vitals target selectors, including unescaped React useId values from the onboarding task list. Metrics remain reportable without a region label. Existing chat, mobile navigation, notification and license behavior is unchanged.
+
+Legacy post plugin menu items handle a trusted single touch before closing, suppress the later compatibility click, and ignore scrolling/long-press/cancelled gestures. Mouse and keyboard click handling stays unchanged.
