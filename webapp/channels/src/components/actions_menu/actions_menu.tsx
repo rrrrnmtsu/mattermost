@@ -264,10 +264,10 @@ export class ActionMenuClass extends React.PureComponent<Props, State> {
                     <Menu.ItemAction
                         key={item.id + '_pluginmenuitem'}
                         text={item.text}
-                        onTouchStart={(event) => this.pluginTouchAction.start(event)}
-                        onTouchMove={(event) => this.pluginTouchAction.move(event)}
+                        onTouchStart={(event: React.TouchEvent<HTMLButtonElement>) => this.pluginTouchAction.start(event)}
+                        onTouchMove={(event: React.TouchEvent<HTMLButtonElement>) => this.pluginTouchAction.move(event)}
                         onTouchCancel={() => this.pluginTouchAction.cancel()}
-                        onTouchEnd={(event) => this.pluginTouchAction.end(event, () => {
+                        onTouchEnd={(event: React.TouchEvent<HTMLButtonElement>) => this.pluginTouchAction.end(event, () => {
                             this.closeDropdown();
                             item.action?.(this.props.post.id);
                         })}
