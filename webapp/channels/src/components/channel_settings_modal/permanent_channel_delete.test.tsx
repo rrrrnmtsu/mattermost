@@ -85,10 +85,13 @@ test('losing the system admin role closes the confirmation without submitting', 
 });
 
 test('cancel can return to Channel Settings without stacking a second modal', () => {
-    const {store} = renderWithContext(<PermanentChannelDeleteModal
-        channel={channel}
-        returnToSettings={true}
-                                      />, state());
+    const {store} = renderWithContext(
+        <PermanentChannelDeleteModal
+            channel={channel}
+            returnToSettings={true}
+        />,
+        state(),
+    );
     fireEvent.click(screen.getByRole('button', {name: 'Cancel'}));
     expect(permanentlyDeleteChannel).not.toHaveBeenCalled();
     const modals = store.getState().views.modals.modalState;
