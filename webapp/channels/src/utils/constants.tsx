@@ -342,6 +342,7 @@ export const ModalIdentifiers = {
     TEAM_SETTINGS: 'team_settings',
     CHANNEL_INFO: 'channel_info',
     DELETE_CHANNEL: 'delete_channel',
+    PERMANENT_DELETE_CHANNEL: 'permanent_delete_channel',
     UNARCHIVE_CHANNEL: 'unarchive_channel',
     CHANNEL_NOTIFICATIONS: 'channel_notifications',
     CHANNEL_INVITE: 'channel_invite',

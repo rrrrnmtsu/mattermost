@@ -11,6 +11,8 @@ import {deleteChannel} from 'actions/views/channel';
 
 import ConfirmationModal from 'components/confirm_modal';
 
+import PermanentChannelDelete from './permanent_channel_delete';
+
 type ChannelSettingsArchiveTabProps = {
     channel: Channel;
     onHide: () => void;
@@ -55,6 +57,8 @@ function ChannelSettingsArchiveTab({
                     defaultMessage='Archive this channel'
                 />
             </button>
+
+            <PermanentChannelDelete channel={channel}/>
 
             {showArchiveConfirmModal && (
                 <ConfirmationModal

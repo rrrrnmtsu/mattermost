@@ -1,0 +1,40 @@
+.ChannelPermanentDelete {
+    padding-top: 24px;
+    border-top: 1px solid rgba(var(--center-channel-color-rgb), 0.16);
+    margin-top: 24px;
+}
+
+.ChannelPermanentDeleteModal {
+    .modal-content {
+        max-height: calc(100vh - 24px);
+        max-height: calc(100dvh - 24px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    }
+
+    .GenericModal__wrapper {
+        display: flex;
+        height: auto;
+        max-height: inherit;
+        flex-direction: column;
+    }
+
+    .modal-body {
+        min-height: 0;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+    }
+
+    .modal-header,
+    .modal-footer {
+        flex: 0 0 auto;
+    }
+
+    .form-control {
+        min-height: 44px;
+        font-size: 16px;
+    }
+
+    .modal-footer .btn {
+        min-height: 44px;
+        white-space: normal;
+    }
+}

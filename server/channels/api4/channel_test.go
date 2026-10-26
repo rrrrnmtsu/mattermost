@@ -3701,6 +3701,23 @@ func TestPermanentDeleteChannel(t *testing.T) {
 	})
 
 	th.App.UpdateConfig(func(cfg *model.Config) { *cfg.ServiceSettings.EnableAPIChannelDeletion = true })
+	t.Run("channel admins cannot permanently delete with the API enabled", func(t *testing.T) {
+		channel := th.CreatePublicChannel(t)
+		resp, err := th.Client.PermanentDeleteChannel(context.Background(), channel.Id)
+		require.Error(t, err)
+		CheckForbiddenStatus(t, resp)
+		_, appErr := th.App.GetChannel(th.Context, channel.Id)
+		require.Nil(t, appErr)
+	})
+	t.Run("system admins cannot permanently delete Town Square", func(t *testing.T) {
+		channel, appErr := th.App.GetChannelByName(th.Context, model.DefaultChannelName, th.BasicTeam.Id, false)
+		require.Nil(t, appErr)
+		resp, err := th.SystemAdminClient.PermanentDeleteChannel(context.Background(), channel.Id)
+		require.Error(t, err)
+		CheckBadRequestStatus(t, resp)
+		_, appErr = th.App.GetChannel(th.Context, channel.Id)
+		require.Nil(t, appErr)
+	})
 	th.TestForSystemAdminAndLocal(t, func(t *testing.T, c *model.Client4) {
 		publicChannel := th.CreatePublicChannel(t)
 		_, err := c.PermanentDeleteChannel(context.Background(), publicChannel.Id)

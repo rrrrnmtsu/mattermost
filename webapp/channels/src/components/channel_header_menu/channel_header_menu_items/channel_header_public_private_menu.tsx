@@ -12,6 +12,7 @@ import {Permissions} from 'mattermost-redux/constants';
 import {isGuest} from 'mattermost-redux/utils/user_utils';
 
 import ChannelMoveToSubMenu from 'components/channel_move_to_sub_menu';
+import PermanentChannelDelete from 'components/channel_settings_modal/permanent_channel_delete';
 import * as Menu from 'components/menu';
 import ChannelPermissionGate from 'components/permissions_gates/channel_permission_gate';
 
@@ -189,6 +190,11 @@ const ChannelHeaderPublicMenu = ({channel, user, isMuted, isDefault, isMobile, i
                     />
                 </ChannelPermissionGate>
             )}
+
+            <PermanentChannelDelete
+                channel={channel}
+                menuItem={true}
+            />
 
             {isArchived && !isDefault && (
                 <ChannelPermissionGate

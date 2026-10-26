@@ -1735,6 +1735,13 @@ export default class Client4 {
         );
     };
 
+    permanentlyDeleteChannel = (channelId: string) => {
+        return this.doFetch<StatusOK>(
+            `${this.getChannelRoute(channelId)}?permanent=true`,
+            {method: 'delete'},
+        );
+    };
+
     unarchiveChannel = (channelId: string) => {
         return this.doFetch<ServerChannel>(
             `${this.getChannelRoute(channelId)}/restore`,

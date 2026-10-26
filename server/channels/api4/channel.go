@@ -1518,6 +1518,21 @@ func deleteChannel(c *Context, w http.ResponseWriter, r *http.Request) {
 	}
 
 	if c.Params.Permanent {
+		// Channel archive permissions must never grant permanent deletion.
+		user, userErr := c.App.GetUser(c.AppContext.Session().UserId)
+		if userErr != nil {
+			c.Err = userErr
+			return
+		}
+		if !user.IsSystemAdmin() {
+			c.SetPermissionError(model.PermissionManageSystem)
+			return
+		}
+		if channel.Name == model.DefaultChannelName {
+			c.Err = model.NewAppError("deleteChannel", "api.channel.delete_channel.cannot.app_error", map[string]any{"Channel": model.DefaultChannelName}, "", http.StatusBadRequest)
+			return
+		}
+
 		if *c.App.Config().ServiceSettings.EnableAPIChannelDeletion {
 			err = c.App.PermanentDeleteChannel(c.AppContext, channel)
 		} else {
