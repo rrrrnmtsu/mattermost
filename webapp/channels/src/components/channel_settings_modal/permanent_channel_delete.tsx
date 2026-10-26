@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {FormattedMessage, useIntl} from 'react-intl';
 import {useDispatch, useSelector} from 'react-redux';
 
@@ -80,6 +80,11 @@ export function PermanentChannelDeleteModal({channel, isStacked = false}: {chann
     const [failed, setFailed] = useState(false);
     const inFlight = useRef(false);
     const allowed = isAdmin && channel.name !== Constants.DEFAULT_CHANNEL && ['O', 'P'].includes(channel.type);
+    useEffect(() => {
+        if (!allowed) {
+            dispatch(closeModal(ModalIdentifiers.PERMANENT_DELETE_CHANNEL));
+        }
+    }, [allowed, dispatch]);
     const close = () => {
         if (!inFlight.current) {
             dispatch(closeModal(ModalIdentifiers.PERMANENT_DELETE_CHANNEL));
@@ -127,7 +132,7 @@ export function PermanentChannelDeleteModal({channel, isStacked = false}: {chann
                         onClick={close}
                     >
                         <FormattedMessage
-                            id='generic.cancel'
+                            id='channel_settings.permanent_delete.cancel'
                             defaultMessage='Cancel'
                         />
                     </button>

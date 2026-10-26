@@ -74,3 +74,11 @@ test('a failed response keeps confirmation open for review', async () => {
     await waitFor(() => expect(screen.getByRole('alert')).toBeVisible());
     expect(screen.getByRole('dialog')).toBeVisible();
 });
+
+test('losing the system admin role closes the confirmation without submitting', () => {
+    const {updateStoreState} = renderWithContext(<PermanentChannelDeleteModal channel={channel}/>, state());
+    expect(screen.getByRole('dialog')).toBeVisible();
+    updateStoreState(state('system_user'));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(permanentlyDeleteChannel).not.toHaveBeenCalled();
+});
