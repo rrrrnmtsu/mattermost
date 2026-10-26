@@ -43,6 +43,7 @@ type ChannelSettingsModalProps = {
     onExited: () => void;
     isOpen: boolean;
     focusOriginElement?: string;
+    initialTab?: 'archive';
 };
 
 enum ChannelSettingsTabs {
@@ -70,7 +71,7 @@ function getFirstVisibleTab(shouldShowInfoTab: boolean, shouldShowAccessRulesTab
     return ChannelSettingsTabs.INFO;
 }
 
-function ChannelSettingsModal({channelId, isOpen, onExited, focusOriginElement}: ChannelSettingsModalProps) {
+function ChannelSettingsModal({channelId, isOpen, onExited, focusOriginElement, initialTab}: ChannelSettingsModalProps) {
     const {formatMessage} = useIntl();
     const dispatch = useDispatch();
     const channel = useSelector((state: GlobalState) => getChannel(state, channelId)) as Channel;
@@ -146,7 +147,7 @@ function ChannelSettingsModal({channelId, isOpen, onExited, focusOriginElement}:
     const firstVisibleTab = getFirstVisibleTab(shouldShowInfoTab, shouldShowAccessRulesTab, shouldShowConfigurationTab, shouldShowArchiveTab);
 
     // Active tab
-    const [activeTab, setActiveTab] = useState<ChannelSettingsTabs>(firstVisibleTab);
+    const [activeTab, setActiveTab] = useState<ChannelSettingsTabs>(initialTab === 'archive' && shouldShowArchiveTab ? ChannelSettingsTabs.ARCHIVE : firstVisibleTab);
 
     // State for showing error in the save changes panel when trying to switch tabs with unsaved changes
     const [showTabSwitchError, setShowTabSwitchError] = useState(false);

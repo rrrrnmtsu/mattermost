@@ -60,6 +60,18 @@ function ChannelSettingsArchiveTab({
 
             <PermanentChannelDelete channel={channel}/>
 
+            <button
+                type='button'
+                className='btn btn-tertiary ChannelSettingsModal__archiveClose'
+                onClick={onHide}
+                id='closeChannelArchiveSettings'
+            >
+                <FormattedMessage
+                    id='generic.close'
+                    defaultMessage='Close'
+                />
+            </button>
+
             {showArchiveConfirmModal && (
                 <ConfirmationModal
                     id='archiveChannelConfirmModal'

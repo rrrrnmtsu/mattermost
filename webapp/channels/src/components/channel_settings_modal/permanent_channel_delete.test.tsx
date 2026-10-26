@@ -6,6 +6,7 @@ import React from 'react';
 import {permanentlyDeleteChannel} from 'actions/views/permanent_channel_deletion';
 
 import {act, fireEvent, renderWithContext, screen, waitFor} from 'tests/react_testing_utils';
+import {ModalIdentifiers} from 'utils/constants';
 import {TestHelper} from 'utils/test_helper';
 
 import PermanentChannelDelete, {PermanentChannelDeleteModal} from './permanent_channel_delete';
@@ -81,4 +82,15 @@ test('losing the system admin role closes the confirmation without submitting', 
     updateStoreState(state('system_user'));
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     expect(permanentlyDeleteChannel).not.toHaveBeenCalled();
+});
+
+test('cancel can return to Channel Settings without stacking a second modal', () => {
+    const {store} = renderWithContext(<PermanentChannelDeleteModal
+        channel={channel}
+        returnToSettings={true}
+                                      />, state());
+    fireEvent.click(screen.getByRole('button', {name: 'Cancel'}));
+    expect(permanentlyDeleteChannel).not.toHaveBeenCalled();
+    const modals = store.getState().views.modals.modalState;
+    expect(modals).toHaveProperty([ModalIdentifiers.CHANNEL_SETTINGS, 'open'], true);
 });

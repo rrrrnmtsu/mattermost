@@ -18,6 +18,8 @@ import * as Menu from 'components/menu';
 
 import {Constants, ModalIdentifiers} from 'utils/constants';
 
+import ChannelSettingsModal from './channel_settings_modal';
+
 import './permanent_channel_delete.scss';
 
 type Props = {channel: Channel; menuItem?: boolean};
@@ -29,11 +31,16 @@ export default function PermanentChannelDelete({channel, menuItem = false}: Prop
         return null;
     }
 
-    const openConfirmation = () => dispatch(openModal({
-        modalId: ModalIdentifiers.PERMANENT_DELETE_CHANNEL,
-        dialogType: PermanentChannelDeleteModal,
-        dialogProps: {channel, isStacked: !menuItem},
-    }));
+    const openConfirmation = () => {
+        if (!menuItem) {
+            dispatch(closeModal(ModalIdentifiers.CHANNEL_SETTINGS));
+        }
+        dispatch(openModal({
+            modalId: ModalIdentifiers.PERMANENT_DELETE_CHANNEL,
+            dialogType: PermanentChannelDeleteModal,
+            dialogProps: {channel, returnToSettings: !menuItem},
+        }));
+    };
     const label = (
         <FormattedMessage
             id='channel_settings.permanent_delete.button'
@@ -71,7 +78,7 @@ export default function PermanentChannelDelete({channel, menuItem = false}: Prop
     );
 }
 
-export function PermanentChannelDeleteModal({channel, isStacked = false}: {channel: Channel; isStacked?: boolean}) {
+export function PermanentChannelDeleteModal({channel, returnToSettings = false}: {channel: Channel; returnToSettings?: boolean}) {
     const {formatMessage} = useIntl();
     const dispatch = useDispatch();
     const isAdmin = useSelector(isCurrentUserSystemAdmin);
@@ -88,6 +95,13 @@ export function PermanentChannelDeleteModal({channel, isStacked = false}: {chann
     const close = () => {
         if (!inFlight.current) {
             dispatch(closeModal(ModalIdentifiers.PERMANENT_DELETE_CHANNEL));
+            if (returnToSettings) {
+                dispatch(openModal({
+                    modalId: ModalIdentifiers.CHANNEL_SETTINGS,
+                    dialogType: ChannelSettingsModal,
+                    dialogProps: {channelId: channel.id, isOpen: true, initialTab: 'archive'},
+                }));
+            }
         }
     };
     const submit = async () => {
@@ -119,7 +133,6 @@ export function PermanentChannelDeleteModal({channel, isStacked = false}: {chann
             modalHeaderText={formatMessage({id: 'channel_settings.permanent_delete.button', defaultMessage: 'Permanently delete channel'})}
             ariaLabel={formatMessage({id: 'channel_settings.permanent_delete.button', defaultMessage: 'Permanently delete channel'})}
             onExited={close}
-            isStacked={isStacked}
             preventClose={pending}
             showCloseButton={!pending}
             keyboardEscape={!pending}
