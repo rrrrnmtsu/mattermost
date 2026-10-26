@@ -17,8 +17,6 @@ import type {
 } from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 
-import {GenericModal} from '@mattermost/components';
-
 import {getTheme} from 'mattermost-redux/selectors/entities/preferences';
 
 import {openModal, closeModal} from 'actions/views/modals';
@@ -31,6 +29,7 @@ import Constants, {A11yClassNames} from 'utils/constants';
 import {isKeyPressed} from 'utils/keyboard';
 
 import {MenuContext, useMenuContextValue} from './menu_context';
+import MobileMenuModal from './mobile_menu_modal';
 
 import './menu.scss';
 
@@ -339,13 +338,10 @@ function MenuModal(props: MenuModalProps) {
 
     return (
         <CompassDesignProvider theme={theme}>
-            <GenericModal
+            <MobileMenuModal
                 id={props.menuId}
-                className='menuModal'
-                backdrop={true}
                 ariaLabel={props.menuAriaLabel}
-                onExited={closeMenuModal}
-                enforceFocus={false}
+                onClose={closeMenuModal}
                 handleKeydown={handleKeydown}
             >
                 <MuiMenuList // serves as backdrop for modals
@@ -358,7 +354,7 @@ function MenuModal(props: MenuModalProps) {
                     {props.children}
                     {props.menuFooter}
                 </MuiMenuList>
-            </GenericModal>
+            </MobileMenuModal>
         </CompassDesignProvider>
     );
 }

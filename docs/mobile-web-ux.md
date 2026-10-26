@@ -11,7 +11,7 @@ by the viewport policy. Focus uses preventScroll when opening the menu.
 
 The policy is loaded from the first webapp entry and bundled CSS. It does not
 depend on reverse-proxy HTML substitution or injected external stylesheets.
-The `sakura-mobile-ux` HTML meta tag identifies this build as `11.7.14-mobile.3.2`.
+The `sakura-mobile-ux` HTML meta tag identifies this build as `11.7.14-mobile.3.3`.
 
 Build with the Node/npm versions in webapp/package.json and the committed
 lockfile. A lockfile-only repair aligns Rollup with the override already in
@@ -81,3 +81,11 @@ active user and channel permission before opening a notification's target.
 The performance reporter ignores malformed web-vitals target selectors, including unescaped React useId values from the onboarding task list. Metrics remain reportable without a region label. Existing chat, mobile navigation, notification and license behavior is unchanged.
 
 Legacy post plugin menu items handle a trusted single touch before closing, suppress the later compatibility click, and ignore scrolling/long-press/cancelled gestures. Mouse and keyboard click handling stays unchanged.
+
+## Mobile channel menu dismissal (mobile.3.3)
+
+Modern mobile menus now have a persistent localized Close button. Clicks on the
+transparent GenericModal wrapper are consumed and dismiss only that menu. Menu
+actions, submenu portals, desktop popovers and shared GenericModal behavior are
+unchanged. Long menus scroll independently above the close footer. Regression
+tests cover click-through, a single action callback, nested portals and cleanup.

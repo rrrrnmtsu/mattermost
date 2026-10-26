@@ -16,8 +16,6 @@ import type {
     KeyboardEvent} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 
-import {GenericModal} from '@mattermost/components';
-
 import {getTheme} from 'mattermost-redux/selectors/entities/preferences';
 
 import {openModal, closeModal} from 'actions/views/modals';
@@ -32,6 +30,7 @@ import {isKeyPressed} from 'utils/keyboard';
 import {SubMenuContext, useMenuContextValue} from './menu_context';
 import {MenuItem} from './menu_item';
 import type {Props as MenuItemProps} from './menu_item';
+import MobileMenuModal from './mobile_menu_modal';
 
 import './menu.scss';
 
@@ -218,22 +217,19 @@ function SubMenuModal(props: SubMenuModalProps) {
 
     return (
         <CompassDesignProvider theme={theme}>
-            <GenericModal
+            <MobileMenuModal
                 id={props.menuId}
                 ariaLabel={props.menuAriaLabel}
-                onExited={handleModalClose}
-                backdrop={true}
-                className='menuModal'
+                onClose={handleModalClose}
             >
                 <MuiMenuList
                     component={'div'}
-                    aria-hidden={true}
                     onClick={handleModalClose}
                 >
                     {props.subMenuHeader}
                     {props.children}
                 </MuiMenuList>
-            </GenericModal>
+            </MobileMenuModal>
         </CompassDesignProvider>
     );
 }
