@@ -9,6 +9,7 @@ import type {FileInfo} from '@mattermost/types/files';
 import {General} from 'mattermost-redux/constants';
 
 import {renderWithContext, act} from 'tests/react_testing_utils';
+import {isIosChrome, isIosWeb, isMobileApp} from 'utils/user_agent';
 import {clearFileInput} from 'utils/utils';
 
 import type {FilesWillUploadHook} from 'types/store/plugins';
@@ -33,6 +34,16 @@ jest.mock('utils/utils', () => {
         sortFilesByName: jest.fn((files) => {
             return files.sort((a: File, b: File) => a.name.localeCompare(b.name, 'en', {numeric: true}));
         }),
+    };
+});
+
+jest.mock('utils/user_agent', () => {
+    const original = jest.requireActual('utils/user_agent');
+    return {
+        ...original,
+        isIosChrome: jest.fn().mockReturnValue(false),
+        isIosWeb: jest.fn().mockReturnValue(false),
+        isMobileApp: jest.fn().mockReturnValue(false),
     };
 });
 
@@ -78,6 +89,12 @@ describe('components/FileUpload', () => {
             uploadFile,
         },
     };
+
+    beforeEach(() => {
+        (isIosChrome as jest.Mock).mockReturnValue(false);
+        (isIosWeb as jest.Mock).mockReturnValue(false);
+        (isMobileApp as jest.Mock).mockReturnValue(false);
+    });
 
     test('should match snapshot', () => {
         const ref = React.createRef<FileUploadClass>();
@@ -489,5 +506,30 @@ describe('components/FileUpload', () => {
 
         expect(baseProps.onUploadError).toHaveBeenCalledTimes(1);
         expect(baseProps.onUploadError).toHaveBeenCalledWith(null);
+    });
+
+    test('sets multiple=false and empty accept for isIosWeb (Safari PWA)', () => {
+        (isIosWeb as jest.Mock).mockReturnValue(true);
+
+        const {container} = renderWithContext(
+            <FileUpload {...baseProps}/>,
+        );
+
+        const input = container.querySelector('input');
+        expect(input).not.toBeNull();
+        expect(input?.multiple).toBe(false);
+        expect(input?.getAttribute('accept')).toBe('');
+    });
+
+    test('keeps image/* accept for isIosChrome', () => {
+        (isIosChrome as jest.Mock).mockReturnValue(true);
+
+        const {container} = renderWithContext(
+            <FileUpload {...baseProps}/>,
+        );
+
+        const input = container.querySelector('input');
+        expect(input).not.toBeNull();
+        expect(input?.getAttribute('accept')).toBe('image/*');
     });
 });

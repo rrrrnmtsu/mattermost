@@ -31,6 +31,7 @@ import {cmdOrCtrlPressed, isKeyPressed} from 'utils/keyboard';
 import {hasPlainText, createFileFromClipboardDataItem} from 'utils/paste';
 import {
     isIosChrome,
+    isIosWeb,
     isMobileApp,
 } from 'utils/user_agent';
 import {
@@ -605,15 +606,23 @@ export class FileUpload extends PureComponent<Props, State> {
 
     render() {
         const {formatMessage} = this.props.intl;
+
+        /**
+         * iOS file input strategy:
+         * - multiple is disabled on iOS (mobile app WebView and Safari/Chrome web): iOS WebViews
+         *   don't upload videos properly in multiple mode, and the multi-select picker can glitch
+         *   on iOS Safari.
+         * - accept stays empty on iOS Safari so the OS sheet offers Photo Library, Camera and
+         *   Files; restricting it (e.g. to image/*,video/*) would hide the Files option. iOS Chrome
+         *   is the exception: it can't upload videos at all, so it's limited to image/*.
+         */
         let multiple = true;
-        if (isMobileApp()) {
-            // iOS WebViews don't upload videos properly in multiple mode
+        if (isMobileApp() || isIosWeb()) {
             multiple = false;
         }
 
         let accept = '';
         if (isIosChrome()) {
-            // iOS Chrome can't upload videos at all
             accept = 'image/*';
         }
 
