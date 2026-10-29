@@ -250,7 +250,7 @@ export default function MobileBottomNavView(props: Props) {
                 >
                     <span className='mmwp-MobileNav__iconWrapper'>
                         <i
-                            className='icon icon-home-outline'
+                            className='icon icon-home-variant-outline'
                             aria-hidden='true'
                         />
                         <Badge count={props.unreadCount}/>
@@ -266,7 +266,7 @@ export default function MobileBottomNavView(props: Props) {
                 >
                     <span className='mmwp-MobileNav__iconWrapper'>
                         <i
-                            className='icon icon-message-outline'
+                            className='icon icon-message-text-outline'
                             aria-hidden='true'
                         />
                     </span>
