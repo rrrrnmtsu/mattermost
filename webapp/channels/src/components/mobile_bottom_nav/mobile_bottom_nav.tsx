@@ -9,14 +9,15 @@ import type {Channel} from '@mattermost/types/channels';
 
 import './mobile_bottom_nav.scss';
 
-type Panel = 'dms' | 'unread' | 'settings' | null;
+type Panel = 'dms' | 'settings' | null;
 
 export type Props = {
     currentChannelId: string;
     teamName: string;
     directChannels: Channel[];
     channelPaths: Record<string, string>;
-    unreadChannels: Channel[];
+    unreadCount: number;
+    mentionCount: number;
     hidden: boolean;
     lhsOpen: boolean;
     pushSettingsHref: string;
@@ -29,17 +30,28 @@ export type Props = {
     onSecuritySettings: () => void;
 };
 
-const icons = {dms: 'icon-account-multiple-outline', unread: 'icon-bell-outline', settings: 'icon-cog-outline'};
-
 const messages = {
-    chat: {id: 'mmwp.mobileNav.chat', defaultMessage: 'Chats'},
+    home: {id: 'mmwp.mobileNav.home', defaultMessage: 'Home'},
     dms: {id: 'mmwp.mobileNav.dms', defaultMessage: 'DMs'},
-    unread: {id: 'mmwp.mobileNav.unread', defaultMessage: 'Unread'},
-    settings: {id: 'mmwp.mobileNav.settings', defaultMessage: 'Settings'},
+    mentionsTab: {id: 'mmwp.mobileNav.mentionsTab', defaultMessage: 'Mentions'},
+    you: {id: 'mmwp.mobileNav.you', defaultMessage: 'You'},
     dmsTitle: {id: 'mmwp.mobileNav.dmsTitle', defaultMessage: 'Direct messages'},
-    unreadTitle: {id: 'mmwp.mobileNav.unreadTitle', defaultMessage: 'Unread conversations'},
     settingsTitle: {id: 'mmwp.mobileNav.settingsTitle', defaultMessage: 'Settings'},
 };
+
+function Badge({count}: {count: number}) {
+    if (count <= 0) {
+        return null;
+    }
+    return (
+        <span
+            className='mmwp-MobileNav__badge'
+            aria-hidden='true'
+        >
+            {count >= 100 ? '99+' : count}
+        </span>
+    );
+}
 
 export default function MobileBottomNavView(props: Props) {
     const intl = useIntl();
@@ -174,31 +186,6 @@ export default function MobileBottomNavView(props: Props) {
                             )}
                         </>
                     )}
-                    {panel === 'unread' && (
-                        <>
-                            <button
-                                className='mmwp-MobileNav__action'
-                                type='button'
-                                onClick={() => {
-                                    setPanel(null);
-                                    props.onMentions();
-                                }}
-                            >
-                                <FormattedMessage
-                                    id='mmwp.mobileNav.mentions'
-                                    defaultMessage='Mentions of me'
-                                />
-                            </button>
-                            {props.unreadChannels.length ? channelList(props.unreadChannels) : (
-                                <p className='mmwp-MobileNav__empty'>
-                                    <FormattedMessage
-                                        id='mmwp.mobileNav.noUnreads'
-                                        defaultMessage='No unread conversations'
-                                    />
-                                </p>
-                            )}
-                        </>
-                    )}
                     {panel === 'settings' && (
                         <>
                             <button
@@ -261,28 +248,61 @@ export default function MobileBottomNavView(props: Props) {
                         props.onChat();
                     }}
                 >
-                    <i
-                        className='icon icon-message-text-outline'
-                        aria-hidden='true'
-                    />
-                    <span>{intl.formatMessage(messages.chat)}</span>
-                </button>
-                {(['dms', 'unread', 'settings'] as const).map((item) => (
-                    <button
-                        key={item}
-                        type='button'
-                        id={`mmwp-mobile-${item}`}
-                        data-panel={item}
-                        aria-expanded={panel === item}
-                        onClick={() => togglePanel(item)}
-                    >
+                    <span className='mmwp-MobileNav__iconWrapper'>
                         <i
-                            className={`icon ${icons[item]}`}
+                            className='icon icon-home-outline'
                             aria-hidden='true'
                         />
-                        <span>{intl.formatMessage(messages[item])}</span>
-                    </button>
-                ))}
+                        <Badge count={props.unreadCount}/>
+                    </span>
+                    <span>{intl.formatMessage(messages.home)}</span>
+                </button>
+                <button
+                    type='button'
+                    id='mmwp-mobile-dms'
+                    data-panel='dms'
+                    aria-expanded={panel === 'dms'}
+                    onClick={() => togglePanel('dms')}
+                >
+                    <span className='mmwp-MobileNav__iconWrapper'>
+                        <i
+                            className='icon icon-message-outline'
+                            aria-hidden='true'
+                        />
+                    </span>
+                    <span>{intl.formatMessage(messages.dms)}</span>
+                </button>
+                <button
+                    type='button'
+                    onClick={() => {
+                        setPanel(null);
+                        props.onMentions();
+                    }}
+                >
+                    <span className='mmwp-MobileNav__iconWrapper'>
+                        <i
+                            className='icon icon-at'
+                            aria-hidden='true'
+                        />
+                        <Badge count={props.mentionCount}/>
+                    </span>
+                    <span>{intl.formatMessage(messages.mentionsTab)}</span>
+                </button>
+                <button
+                    type='button'
+                    id='mmwp-mobile-settings'
+                    data-panel='settings'
+                    aria-expanded={panel === 'settings'}
+                    onClick={() => togglePanel('settings')}
+                >
+                    <span className='mmwp-MobileNav__iconWrapper'>
+                        <i
+                            className='icon icon-account-outline'
+                            aria-hidden='true'
+                        />
+                    </span>
+                    <span>{intl.formatMessage(messages.you)}</span>
+                </button>
             </nav>
         </div>
     );

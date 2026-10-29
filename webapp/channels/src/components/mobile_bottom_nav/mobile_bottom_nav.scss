@@ -68,6 +68,28 @@
             }
         }
 
+        &__iconWrapper {
+            position: relative;
+            display: inline-flex;
+        }
+
+        &__badge {
+            position: absolute;
+            top: -4px;
+            right: -6px;
+            min-width: 16px;
+            height: 16px;
+            padding: 0 3px;
+            border-radius: 8px;
+            background: var(--mention-color, #e55);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 600;
+            line-height: 16px;
+            pointer-events: none;
+            text-align: center;
+        }
+
         &__panel {
             position: absolute;
             z-index: 21;
