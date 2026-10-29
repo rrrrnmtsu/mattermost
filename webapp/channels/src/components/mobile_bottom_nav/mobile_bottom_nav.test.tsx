@@ -15,9 +15,10 @@ function makeProps(): Props {
     return {
         currentChannelId: 'current',
         teamName: 'work',
-        channelPaths: {dm: '/work/messages/@peer', unread: '/work/channels/operations'},
+        channelPaths: {dm: '/work/messages/@peer'},
         directChannels: [TestHelper.getChannelMock({id: 'dm', name: 'user1__user2', type: 'D', display_name: 'Managed peer'})],
-        unreadChannels: [TestHelper.getChannelMock({id: 'unread', name: 'operations', type: 'P', display_name: 'Operations'})],
+        unreadCount: 0,
+        mentionCount: 0,
         hidden: false,
         lhsOpen: false,
         pushSettingsHref: '/plugins/com.sakura.mattermost-webpush/setup',
@@ -32,12 +33,30 @@ function makeProps(): Props {
 }
 
 describe('mobile navigation', () => {
-    it('opens the conversation list on the first touch without a tooltip', async () => {
+    it('opens the channel list from Home on the first touch without a tooltip', async () => {
         const props = makeProps();
         renderWithContext(<MobileBottomNavView {...props}/>);
-        await userEvent.pointer({keys: '[TouchA]', target: screen.getByRole('button', {name: 'Chats'})});
+        await userEvent.pointer({keys: '[TouchA]', target: screen.getByRole('button', {name: 'Home'})});
         expect(props.onChat).toHaveBeenCalledTimes(1);
         expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+    });
+
+    it('shows the unread count as a badge on the Home tab', () => {
+        renderWithContext(
+            <MobileBottomNavView
+                {...makeProps()}
+                unreadCount={3}
+            />,
+        );
+        expect(screen.getByRole('button', {name: 'Home'})).toHaveTextContent('3');
+    });
+
+    it('opens mention history straight from the Mentions tab without opening a panel', async () => {
+        const props = makeProps();
+        renderWithContext(<MobileBottomNavView {...props}/>);
+        await userEvent.click(screen.getByRole('button', {name: 'Mentions'}));
+        expect(props.onMentions).toHaveBeenCalledTimes(1);
+        expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
 
     it('opens an existing DM with one further native link click', async () => {
@@ -65,29 +84,11 @@ describe('mobile navigation', () => {
         expect(screen.queryByText('opaque-group-identifier')).not.toBeInTheDocument();
     });
 
-    it('keeps actual unread conversations separate from mention history', async () => {
-        const props = makeProps();
-        renderWithContext(<MobileBottomNavView {...props}/>);
-        await userEvent.click(screen.getByRole('button', {name: 'Unread'}));
-        expect(screen.getByRole('link', {name: 'Operations'})).toHaveAttribute('href', '/work/channels/operations');
-        expect(screen.queryByRole('link', {name: 'Managed peer'})).not.toBeInTheDocument();
-        await userEvent.click(screen.getByRole('button', {name: 'Mentions of me'}));
-        expect(props.onMentions).toHaveBeenCalledTimes(1);
-    });
-
-    it('shows the empty unread state without pretending mentions are unread', async () => {
-        const props = {...makeProps(), unreadChannels: []};
-        renderWithContext(<MobileBottomNavView {...props}/>);
-        await userEvent.click(screen.getByRole('button', {name: 'Unread'}));
-        expect(screen.getByText('No unread conversations')).toBeInTheDocument();
-        expect(screen.queryByRole('link', {name: 'Operations'})).not.toBeInTheDocument();
-        expect(screen.getByRole('button', {name: 'Mentions of me'})).toBeInTheDocument();
-    });
-
     it('provides account settings and the separate push setup link', async () => {
         const props = makeProps();
         renderWithContext(<MobileBottomNavView {...props}/>);
-        await userEvent.click(screen.getByRole('button', {name: 'Settings'}));
+        await userEvent.click(screen.getByRole('button', {name: 'You'}));
+        expect(screen.getByRole('heading', {name: 'Settings'})).toBeInTheDocument();
         expect(screen.getByRole('link', {name: 'Set up phone notifications'})).toHaveAttribute('href', props.pushSettingsHref);
         await userEvent.click(screen.getByRole('button', {name: 'Notification and display settings'}));
         expect(props.onAccountSettings).toHaveBeenCalledTimes(1);
@@ -96,7 +97,7 @@ describe('mobile navigation', () => {
     it('opens profile and MFA settings separately from product preferences', async () => {
         const props = makeProps();
         renderWithContext(<MobileBottomNavView {...props}/>);
-        await userEvent.click(screen.getByRole('button', {name: 'Settings'}));
+        await userEvent.click(screen.getByRole('button', {name: 'You'}));
         await userEvent.click(screen.getByRole('button', {name: 'Profile and security'}));
         expect(props.onSecuritySettings).toHaveBeenCalledTimes(1);
         expect(props.onAccountSettings).not.toHaveBeenCalled();

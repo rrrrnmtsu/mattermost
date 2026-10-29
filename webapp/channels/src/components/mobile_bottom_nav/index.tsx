@@ -4,7 +4,7 @@
 import React, {lazy, useEffect, useMemo, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 
-import {getCurrentChannelId, getDirectAndGroupChannels, getMyChannelMemberships, getUnreadChannels} from 'mattermost-redux/selectors/entities/channels';
+import {basicUnreadMeta, getCurrentChannelId, getDirectAndGroupChannels, getMyChannelMemberships, getUnreadChannels, getUnreadStatusInCurrentTeam} from 'mattermost-redux/selectors/entities/channels';
 import {getConfig} from 'mattermost-redux/selectors/entities/general';
 import {getCurrentTeam, getMyTeams} from 'mattermost-redux/selectors/entities/teams';
 import {getCurrentUserId, getUsers} from 'mattermost-redux/selectors/entities/users';
@@ -41,6 +41,8 @@ export default function MobileBottomNav() {
     const users = useSelector(getUsers);
     const members = useSelector(getMyChannelMemberships);
     const unreads = useSelector(getUnreadChannels);
+    const unreadStatus = useSelector(getUnreadStatusInCurrentTeam);
+    const unreadMeta = basicUnreadMeta(unreadStatus);
     const currentChannelId = useSelector(getCurrentChannelId);
     const modalOpen = useSelector(isAnyModalOpen);
     const lhsOpen = useSelector(getIsLhsOpen);
@@ -93,7 +95,8 @@ export default function MobileBottomNav() {
                 teamName={team.name}
                 directChannels={directChannels}
                 channelPaths={channelPaths}
-                unreadChannels={unreads}
+                unreadCount={unreads.length}
+                mentionCount={unreadMeta.unreadMentionCount}
                 hidden={keyboardOccluded || modalOpen || rhsMenuOpen}
                 lhsOpen={lhsOpen}
                 pushSettingsHref={(config.SiteURL || '').replace(/\/$/, '') + '/plugins/com.sakura.mattermost-webpush/setup'}
