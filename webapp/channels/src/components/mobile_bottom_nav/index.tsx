@@ -7,6 +7,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {basicUnreadMeta, getCurrentChannelId, getDirectAndGroupChannels, getMyChannelMemberships, getUnreadChannels, getUnreadStatusInCurrentTeam} from 'mattermost-redux/selectors/entities/channels';
 import {getConfig} from 'mattermost-redux/selectors/entities/general';
 import {getCurrentTeam, getMyTeams} from 'mattermost-redux/selectors/entities/teams';
+import {getThreadCountsInCurrentTeam, getUnreadThreadsInCurrentTeam} from 'mattermost-redux/selectors/entities/threads';
 import {getCurrentUserId, getUsers} from 'mattermost-redux/selectors/entities/users';
 
 import {clearChannelSelection, setUnreadFilterEnabled} from 'actions/views/channel_sidebar';
@@ -43,6 +44,8 @@ export default function MobileBottomNav() {
     const unreads = useSelector(getUnreadChannels);
     const unreadStatus = useSelector(getUnreadStatusInCurrentTeam);
     const unreadMeta = basicUnreadMeta(unreadStatus);
+    const unreadThreadIds = useSelector(getUnreadThreadsInCurrentTeam);
+    const threadCounts = useSelector(getThreadCountsInCurrentTeam);
     const currentChannelId = useSelector(getCurrentChannelId);
     const modalOpen = useSelector(isAnyModalOpen);
     const lhsOpen = useSelector(getIsLhsOpen);
@@ -86,7 +89,9 @@ export default function MobileBottomNav() {
         }));
     }
 
-    const channelPaths = Object.fromEntries([...directChannels, ...unreads].map((channel) => [channel.id, getMobileChannelPath(channel, team.name, currentUserId, users)]));
+    const channelPaths = Object.fromEntries(directChannels.map((channel) => [channel.id, getMobileChannelPath(channel, team.name, currentUserId, users)]));
+    const threadPaths = Object.fromEntries(unreadThreadIds.map((id) => [id, `/${team.name}/threads/${id}`]));
+    const unreadThreadCount = threadCounts?.total_unread_threads ?? 0;
 
     return (
         <>
@@ -97,6 +102,9 @@ export default function MobileBottomNav() {
                 channelPaths={channelPaths}
                 unreadCount={unreads.length}
                 mentionCount={unreadMeta.unreadMentionCount}
+                unreadThreadCount={unreadThreadCount}
+                threadPaths={threadPaths}
+                unreadThreadIds={unreadThreadIds}
                 hidden={keyboardOccluded || modalOpen || rhsMenuOpen}
                 lhsOpen={lhsOpen}
                 pushSettingsHref={(config.SiteURL || '').replace(/\/$/, '') + '/plugins/com.sakura.mattermost-webpush/setup'}

@@ -19,6 +19,9 @@ function makeProps(): Props {
         directChannels: [TestHelper.getChannelMock({id: 'dm', name: 'user1__user2', type: 'D', display_name: 'Managed peer'})],
         unreadCount: 0,
         mentionCount: 0,
+        unreadThreadCount: 0,
+        threadPaths: {},
+        unreadThreadIds: [],
         hidden: false,
         lhsOpen: false,
         pushSettingsHref: '/plugins/com.sakura.mattermost-webpush/setup',
@@ -51,12 +54,45 @@ describe('mobile navigation', () => {
         expect(screen.getByRole('button', {name: 'Home'})).toHaveTextContent('3');
     });
 
-    it('opens mention history straight from the Mentions tab without opening a panel', async () => {
+    it('opens the Activity panel from the Activity tab instead of jumping to mentions', async () => {
         const props = makeProps();
         renderWithContext(<MobileBottomNavView {...props}/>);
-        await userEvent.click(screen.getByRole('button', {name: 'Mentions'}));
+        await userEvent.click(screen.getByRole('button', {name: 'Activity'}));
+        expect(screen.getByRole('heading', {name: 'Activity'})).toBeInTheDocument();
+        expect(props.onMentions).not.toHaveBeenCalled();
+    });
+
+    it('opens mention history from the Mentions of me action inside the Activity panel', async () => {
+        const props = makeProps();
+        renderWithContext(<MobileBottomNavView {...props}/>);
+        await userEvent.click(screen.getByRole('button', {name: 'Activity'}));
+        await userEvent.click(screen.getByRole('button', {name: 'Mentions of me'}));
         expect(props.onMentions).toHaveBeenCalledTimes(1);
         expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+
+    it('lists unread threads in the Activity panel and follows them as native links', async () => {
+        const props = makeProps();
+        props.unreadThreadIds = ['thread1'];
+        props.threadPaths = {thread1: '/work/threads/thread1'};
+        const history = createMemoryHistory({initialEntries: ['/work/channels/operations']});
+        renderWithContext(<MobileBottomNavView {...props}/>, {}, {history});
+        await userEvent.click(screen.getByRole('button', {name: 'Activity'}));
+        await userEvent.click(screen.getByRole('link', {name: 'Unread thread'}));
+        expect(history.location.pathname).toBe('/work/threads/thread1');
+        expect(props.onChannelSelected).toHaveBeenCalledTimes(1);
+        expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+
+    it('shows the combined mention and unread thread count as a badge on the Activity tab', () => {
+        renderWithContext(
+            <MobileBottomNavView
+                {...makeProps()}
+                mentionCount={2}
+                unreadThreadCount={3}
+            />,
+        );
+        expect(screen.getByRole('button', {name: 'Activity'})).toHaveTextContent('5');
     });
 
     it('opens an existing DM with one further native link click', async () => {

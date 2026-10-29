@@ -9,7 +9,7 @@ import type {Channel} from '@mattermost/types/channels';
 
 import './mobile_bottom_nav.scss';
 
-type Panel = 'dms' | 'settings' | null;
+type Panel = 'dms' | 'activity' | 'settings' | null;
 
 export type Props = {
     currentChannelId: string;
@@ -18,6 +18,9 @@ export type Props = {
     channelPaths: Record<string, string>;
     unreadCount: number;
     mentionCount: number;
+    unreadThreadCount: number;
+    threadPaths: Record<string, string>;
+    unreadThreadIds: string[];
     hidden: boolean;
     lhsOpen: boolean;
     pushSettingsHref: string;
@@ -33,10 +36,13 @@ export type Props = {
 const messages = {
     home: {id: 'mmwp.mobileNav.home', defaultMessage: 'Home'},
     dms: {id: 'mmwp.mobileNav.dms', defaultMessage: 'DMs'},
-    mentionsTab: {id: 'mmwp.mobileNav.mentionsTab', defaultMessage: 'Mentions'},
+    activity: {id: 'mmwp.mobileNav.activity', defaultMessage: 'Activity'},
     you: {id: 'mmwp.mobileNav.you', defaultMessage: 'You'},
     dmsTitle: {id: 'mmwp.mobileNav.dmsTitle', defaultMessage: 'Direct messages'},
+    activityTitle: {id: 'mmwp.mobileNav.activityTitle', defaultMessage: 'Activity'},
     settingsTitle: {id: 'mmwp.mobileNav.settingsTitle', defaultMessage: 'Settings'},
+    thread: {id: 'mmwp.mobileNav.thread', defaultMessage: 'Unread thread'},
+    noThreads: {id: 'mmwp.mobileNav.noThreads', defaultMessage: 'No unread threads'},
 };
 
 function Badge({count}: {count: number}) {
@@ -186,6 +192,51 @@ export default function MobileBottomNavView(props: Props) {
                             )}
                         </>
                     )}
+                    {panel === 'activity' && (
+                        <>
+                            {props.unreadThreadIds.length ? (
+                                <ul className='mmwp-MobileNav__conversations'>
+                                    {props.unreadThreadIds.map((threadId) => (
+                                        <li key={threadId}>
+                                            <Link
+                                                to={props.threadPaths[threadId]}
+                                                onClick={() => {
+                                                    props.onChannelSelected();
+                                                    setPanel(null);
+                                                }}
+                                            >
+                                                <i
+                                                    className='icon icon-reply-outline'
+                                                    aria-hidden='true'
+                                                />
+                                                <span>{intl.formatMessage(messages.thread)}</span>
+                                            </Link>
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <p className='mmwp-MobileNav__empty'>
+                                    <FormattedMessage
+                                        id='mmwp.mobileNav.noThreads'
+                                        defaultMessage='No unread threads'
+                                    />
+                                </p>
+                            )}
+                            <button
+                                className='mmwp-MobileNav__action'
+                                type='button'
+                                onClick={() => {
+                                    setPanel(null);
+                                    props.onMentions();
+                                }}
+                            >
+                                <FormattedMessage
+                                    id='mmwp.mobileNav.mentions'
+                                    defaultMessage='Mentions of me'
+                                />
+                            </button>
+                        </>
+                    )}
                     {panel === 'settings' && (
                         <>
                             <button
@@ -274,19 +325,18 @@ export default function MobileBottomNavView(props: Props) {
                 </button>
                 <button
                     type='button'
-                    onClick={() => {
-                        setPanel(null);
-                        props.onMentions();
-                    }}
+                    data-panel='activity'
+                    aria-expanded={panel === 'activity'}
+                    onClick={() => togglePanel('activity')}
                 >
                     <span className='mmwp-MobileNav__iconWrapper'>
                         <i
-                            className='icon icon-at'
+                            className='icon icon-bell-outline'
                             aria-hidden='true'
                         />
-                        <Badge count={props.mentionCount}/>
+                        <Badge count={props.mentionCount + props.unreadThreadCount}/>
                     </span>
-                    <span>{intl.formatMessage(messages.mentionsTab)}</span>
+                    <span>{intl.formatMessage(messages.activity)}</span>
                 </button>
                 <button
                     type='button'
