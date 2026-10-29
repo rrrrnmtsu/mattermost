@@ -274,44 +274,43 @@
         }
     }
 
-    .AdvancedTextEditor__mobile-actions {
-        position: static;
+    .AdvancedTextEditor__cell {
         display: flex;
-        width: 100%;
         min-height: 56px;
+        flex-flow: row wrap;
+        align-items: flex-end;
+    }
+
+    // Promote action bar buttons as direct flex children of the cell (1-row composer).
+    // The plugin mmwp-ui-tweaks v0.9.0 .AdvancedTextEditor__mobile-actions rule
+    // (display:contents + #advancedTextEditorCell flex-flow:row wrap) can now be removed.
+    .AdvancedTextEditor__mobile-actions {
+        display: contents;
+    }
+
+    .AdvancedTextEditor__action-button {
+        width: 44px;
+        height: 44px;
         flex-shrink: 0;
-        align-items: center;
-        padding: 4px 8px;
-        gap: 6px;
+    }
 
-        button {
-            min-width: 44px;
-            min-height: 44px;
+    .splitSendButton {
+        width: 48px;
+        height: 48px;
+        flex-shrink: 0;
+        margin-left: auto;
+
+        &.scheduledPost {
+            width: 92px;
         }
 
-        .AdvancedTextEditor__action-button {
+        .SendMessageButton {
+            min-width: 48px;
+            min-height: 48px;
+        }
+
+        .button_send_post_options {
             width: 44px;
-            height: 44px;
-        }
-
-        .splitSendButton {
-            width: 48px;
-            height: 48px;
-            flex-shrink: 0;
-            margin-left: auto;
-
-            &.scheduledPost {
-                width: 92px;
-            }
-
-            .SendMessageButton {
-                min-width: 48px;
-                min-height: 48px;
-            }
-
-            .button_send_post_options {
-                width: 44px;
-            }
         }
     }
 
